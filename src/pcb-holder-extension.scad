@@ -159,17 +159,24 @@ module sleeve_shell() {
 }
 
 // C-shaped tapered post above Z = 0. Same open-on-+X channel as the sleeve,
-// extended upward by extension_height. Walls remain on -X, +Y, -Y.
+// extended upward by extension_height. Walls remain on -X, +Y, -Y, plus a
+// solid top cap of wall_thickness sealing the top.
 module upper_body() {
+    // Cavity stops wall_thickness below the top to leave a solid roof.
+    cavity_top_z = extension_height - wall_thickness;
+    // Interpolate inner cavity dimensions at cavity_top_z (linear taper).
+    z_frac = cavity_top_z / extension_height;
+    cap_inner_x = upper_x_base + (upper_x_topz - upper_x_base) * z_frac;
+    cap_inner_y = upper_y_base + (upper_y_topz - upper_y_base) * z_frac;
     difference() {
         tapered_box(upper_outer_x_base, upper_outer_y_base,
                     upper_outer_x_topz, upper_outer_y_topz,
                     0, extension_height);
-        // Cavity in the upper section, also open on +X.
+        // Cavity, open on +X, sealed at the top by wall_thickness.
         translate([wall_thickness, 0, 0])
             tapered_box(upper_x_base + 2 * wall_thickness, upper_y_base,
-                        upper_x_topz + 2 * wall_thickness, upper_y_topz,
-                        0 - eps, extension_height + eps);
+                        cap_inner_x + 2 * wall_thickness, cap_inner_y,
+                        0 - eps, cavity_top_z);
     }
 }
 
