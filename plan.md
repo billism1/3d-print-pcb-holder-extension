@@ -16,57 +16,58 @@
 
 ## Coordinate Convention
 
-- **X axis**: left-right (matches arm's "front view" / 24 mm dimension; retainer bolt axis)
-- **Y axis**: front-to-back (matches arm's "side view" / 30 mm dimension; hand screw axis)
-- **Z axis**: vertical (arm height)
-- Origin at the bottom-center of the arm's top face when the extension is seated (i.e., extension's sleeve cavity ceiling sits at Z = 0; positive Z goes up into the extension; negative Z goes down into the sleeve over the arm)
+The extension is a **C-shaped channel** that slips onto the arm horizontally from the inner (PCB-facing) side, NOT from the top. The "outer" face is fully open.
+
+- **+X = outer side** (away from PCB center) → **OPEN**; this is the side the extension is pressed onto the arm from
+- **-X = inner side** (toward PCB center) → closed wall; carries top boss
+- **+Y = front face** → closed wall; carries hand-screw through-hole
+- **-Y = back face** → closed wall; carries hand-screw nut pocket
+- **+Z = up** → origin Z = 0 sits at the top face of the arm (sleeve extends down to Z = -sleeve_depth, upper body extends up to Z = +extension_height)
 
 ## Geometry Breakdown
 
-### 1. Sleeve over arm top (negative Z region)
-- Hollow tapered cap that slides down over the arm's top
-- **Sleeve depth**: 25 mm (covers bolt hole at 15 mm + 10 mm extra grip)
-- **Inner cavity** matches arm taper + tolerance:
-  - At Z = 0 (arm top, extension ceiling): 16 mm (X) × 20 mm (Y) + 0.2 mm per side → 16.4 × 20.4
-  - At Z = -25 (bottom of sleeve): linearly interpolated arm width at (80 - 25) = 55 mm from bottom = 16 + (24-16) × 25/80 = 18.5 mm (X), 20 + (30-20) × 25/80 = 23.125 mm (Y) + tolerance → ~18.9 × 23.5
-- **Outer wall**: inner cavity + 3 mm wall thickness on each side
-- Built with `hull()` of two stacked rounded rectangles (top + bottom of sleeve) for outer shell, then subtract a `hull()` of inner cavity profiles
+### 1. Sleeve (lower section, Z = -25 to 0)
+- C-shaped tapered channel covering the upper portion of the arm
+- Three walls: -X (inner), +Y (front), -Y (back); +X is open
+- **Sleeve depth**: 25 mm
+- **Cavity** matches arm taper + 0.2 mm/side tolerance:
+  - At Z = 0: 16.4 × 20.4 mm
+  - At Z = -25: ~18.9 × 23.5 mm
+- **Outer**: cavity + 3 mm wall on each side
+- Implementation: hull() outer tapered box, then subtract a cavity tapered box that's been widened in +X by `wall_thickness` so it punches through the +X wall entirely while leaving the -X wall intact
 
-### 2. Lower mount — bolt hole + boss clearance recess + nut pocket
+### 2. Lower mount — boss clearance hole on -X wall
 - Located at Z = -15 (aligns with arm's retainer bolt hole)
-- **Through-hole**: 4 mm + clearance (4.3 mm) along X axis through both sleeve walls
-- **Boss clearance recess**: cylindrical pocket on the **-X (inner) cavity wall**, sized to receive the arm's protruding boss
-  - Diameter: 15.8 + 0.4 = 16.2 mm
-  - Depth: 4.3 mm (clears the 4 mm boss protrusion + 0.3 mm clearance)
-  - Punches through the 3 mm sleeve wall, leaving an opening on the -X face — this is intended; the boss seats into the opening and acts as the primary alignment feature
-- **Nut pocket**: hex recess on the **+X (outer) face**
-  - 7 mm A/F, 3 mm deep, captures M4 nut, opens outward
-- **Assembly**: insert nut into +X pocket from outside, slide extension over arm (boss snaps into recess), thread M4 bolt from -X (inner side) through arm and into captured nut
-- Note: the snug taper-fit of the sleeve over the arm + the boss-in-recess engagement provide alignment and anti-rotation; the bolt provides the fastening
+- **Boss clearance hole**: 16.2 mm dia, cuts entirely through the 3 mm -X wall
+  - The arm's 15.8 mm boss seats into this hole as the extension is pressed onto the arm from the +X open side
+  - Boss protrudes 4 mm but wall is only 3 mm → boss tip sticks ~1 mm proud of the -X face (intentional and harmless)
+- **Bolt + nut**: M4 bolt threads from -X side through the boss (4 mm hole) and through the arm; user holds an M4 nut against the arm's outer face — accessible because the +X side of the extension is open
+- No captive nut feature on the lower mount (no room — the boss occupies the wall thickness)
+- Alignment / anti-rotation comes from the snug 3-wall channel fit + the boss seated in the hole
 
-### 3. Upper extension (positive Z region)
-- Rises `extension_height` mm above arm top (default: 40 mm, parameterized)
-- Profile continues the arm's taper:
-  - At Z = 0 (base of upper section): matches arm-top outer dimensions = 16 × 20 mm + walls = 22 × 26 mm outer (matches sleeve outer at top)
-  - At Z = `extension_height` (top of extension): narrows further at the same taper rate as the arm
-    - X taper rate: (24-16)/80 = 0.1 mm/mm → at Z = 40, X = 16 - 0.1 × 40 = 12 mm; outer = 18 mm
-    - Y taper rate: (30-20)/80 = 0.125 mm/mm → at Z = 40, Y = 20 - 0.125 × 40 = 15 mm; outer = 21 mm
-- Solid body (no internal cavity in the upper section)
-- Built with `hull()` of two stacked rounded rectangles (base + top of upper section)
+### 3. Upper body (upper section, Z = 0 to +extension_height)
+- Same C-shaped channel as the sleeve, continued upward
+- Three walls (-X, +Y, -Y), open on +X
+- Profile continues the arm's taper rates beyond the arm top:
+  - X taper rate: (24-16)/80 = 0.1 mm/mm
+  - Y taper rate: (30-20)/80 = 0.125 mm/mm
+  - At Z = +40: inner ~12 × 15 mm, outer ~18 × 21 mm
+- Implementation: same hull-outer-minus-cavity pattern as sleeve, with cavity widened in +X to punch the +X wall
 
 ### 4. Top mounting — mirrors original arm geometry
-- Located 15 mm below the top of the extension (mirrors original arm's 15-mm-from-top bolt position)
-- **Through-hole**: 4 mm dia along X axis, all the way through
-- **Boss on inner side face**: 15.8 mm OD × 4 mm protrusion (cylinder added to the inner face, concentric with through-hole)
-- **Hand screw assembly** (front-to-back, Y axis):
-  - 4 mm clearance through-hole along Y axis (for 3.85 mm threaded shaft)
-  - 7 mm A/F hex nut pocket on the **back face** (Y- side), ~3 mm deep, captures the M4 nut
-  - Same height as the top through-hole, intersects it (the screw tip presses on the bolt to lock it, just like in the original arm)
+- Located 15 mm below the top of the extension
+- **Bolt through-hole**: 4 mm + clearance along X axis, through the -X wall and through the boss
+- **Boss on -X face**: 15.8 mm OD × 4 mm protrusion (added to the -X face of the upper body, concentric with the through-hole) — this is what the original PCB bracket clamps onto
+- **Hand screw assembly** (front-to-back, Y axis, intersects the upper bolt hole):
+  - 4 mm clearance through-hole along Y axis through both Y walls
+  - 7 mm A/F hex nut pocket on the **-Y face**, ~3 mm deep, opens outward
+  - Nut insertion: with the +X side open, the nut can be slid into the -Y pocket from inside the cavity OR loaded from the outside through the pocket opening
+  - The screw tip presses on the bolt shaft to lock it, just like in the original arm
 
 ### 5. Assembly
-- Render one piece (e.g., the right-arm version, with peg/boss on the X- inner face)
-- For the other arm: `mirror([1, 0, 0])` translated copy
-- The top-level assembly produces both pieces side by side for visualization
+- Render one piece (right-arm version)
+- For the other arm: `mirror([1, 0, 0])` translated copy at the top level
+- The piece is the same — same as the original arms being identical pieces, just rotated 180°
 
 ## Parameters Summary
 
@@ -79,7 +80,6 @@
 | `bolt_clearance` | 0.3 mm | Through-hole oversize for M4 bolt |
 | `top_bolt_offset_from_top` | 15 mm | Mirrors arm's bolt-from-top distance |
 | `boss_recess_clearance` | 0.4 mm | Added to boss OD for slip fit |
-| `boss_recess_depth` | 4.3 mm | Clears 4 mm boss protrusion |
 | `boss_od` | 15.8 mm | Matches arm boss for bracket remount |
 | `boss_protrusion` | 4 mm | Matches arm boss |
 | `nut_size` | 7 mm | M4 hex A/F |

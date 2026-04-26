@@ -6,15 +6,19 @@
 //   - Noah NH-11E (Amazon B0CY4DRHWK)
 //   - Pro's Kit SN-390 (Adafruit 3791)
 //
-// Function: Slides over the top of a vertical arm, secured through the
+// Function: C-shaped channel that slips onto the arm horizontally from the
+//           inner side (toward PCB center). The arm's protruding retainer
+//           boss enters through the open outer face. Secured through the
 //           original retainer-bolt hole. Extends the arm upward and provides
 //           an identical boss + nut pocket at its top so the original
 //           spring-loaded PCB bracket and hand screw remount on the extension.
 //
 // Coordinate system (single piece, "right arm" version):
-//   +X = outer side  (-X = inner side, faces PCB center; peg + boss live here)
-//   +Y = front       (-Y = back; hand-screw nut pocket lives on -Y face)
-//   +Z = up          (origin Z = 0 sits at the top face of the arm)
+//   +X = outer side  — OPEN; this is the side the extension slips on from
+//   -X = inner side  — closed wall; faces PCB center; carries top boss
+//   +Y = front       — closed wall; carries hand-screw through-hole
+//   -Y = back        — closed wall; carries hand-screw nut pocket
+//   +Z = up          — origin Z = 0 sits at the top face of the arm
 //==============================================================================
 
 //==============================================================================
@@ -49,10 +53,10 @@ wall_thickness   = 3;    // mm
 // Mirrors original arm: top mounting hole this far below extension top
 top_bolt_offset_from_top = 15;
 
-// Boss clearance recess (cut into the -X inner cavity wall at the lower bolt
-// height to receive the arm's protruding 15.8 mm boss).
+// Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
+// 15.8 mm boss seat fully through the wall. With wall_thickness < boss
+// protrusion, this hole punches all the way through the -X wall.
 boss_recess_clearance = 0.4;   // mm - added to OD for slip fit over boss
-boss_recess_depth     = retainer_boss_protrude + 0.3;  // mm - clears full protrusion
 
 //==============================================================================
 // 3. TOLERANCES
@@ -135,25 +139,38 @@ module hex_pocket(af, depth) {
 // 7. COMPONENT MODULES
 //==============================================================================
 
-// Hollow tapered cap covering the top of the arm.
-// Outer: Z = -sleeve_depth to Z = 0.
-// Inner cavity: open at bottom, capped at Z = 0 by wall_thickness.
+// C-shaped tapered channel over the arm top portion.
+// Outer hull: Z = -sleeve_depth to Z = 0.
+// Inner cavity is hollowed out AND extended outward in +X to remove the
+// entire +X wall, leaving three walls (-X, +Y, -Y) plus the closed top cap.
+// The arm and its protruding boss enter through the open +X side.
 module sleeve_shell() {
     difference() {
         tapered_box(sleeve_x_bot, sleeve_y_bot,
                     sleeve_x_top, sleeve_y_top,
                     -sleeve_depth, 0);
-        tapered_box(cavity_x_bot, cavity_y_bot,
-                    cavity_x_top, cavity_y_top,
-                    -sleeve_depth - eps, 0 - eps);
+        // Cavity, shifted +X by wall_thickness so it punches the +X wall
+        // entirely while leaving the -X wall intact at full thickness.
+        translate([wall_thickness, 0, 0])
+            tapered_box(cavity_x_bot + 2 * wall_thickness, cavity_y_bot,
+                        cavity_x_top + 2 * wall_thickness, cavity_y_top,
+                        -sleeve_depth - eps, 0 - eps);
     }
 }
 
-// Solid tapered post above Z = 0
+// C-shaped tapered post above Z = 0. Same open-on-+X channel as the sleeve,
+// extended upward by extension_height. Walls remain on -X, +Y, -Y.
 module upper_body() {
-    tapered_box(upper_outer_x_base, upper_outer_y_base,
-                upper_outer_x_topz, upper_outer_y_topz,
-                0, extension_height);
+    difference() {
+        tapered_box(upper_outer_x_base, upper_outer_y_base,
+                    upper_outer_x_topz, upper_outer_y_topz,
+                    0, extension_height);
+        // Cavity in the upper section, also open on +X.
+        translate([wall_thickness, 0, 0])
+            tapered_box(upper_x_base + 2 * wall_thickness, upper_y_base,
+                        upper_x_topz + 2 * wall_thickness, upper_y_topz,
+                        0 - eps, extension_height + eps);
+    }
 }
 
 // Boss on the inner side face (-X side) at the upper bolt height.
@@ -171,39 +188,25 @@ module top_boss() {
 // 8. SUBTRACTIONS (holes + nut pockets)
 //==============================================================================
 
-// Lower bolt through-hole + boss clearance recess + hex nut pocket on outer face.
+// Boss clearance hole through the -X wall at lower_bolt_z.
+// Sized to let the arm's 15.8 mm boss seat fully through the wall as the
+// extension is pressed onto the arm from the inside. The boss tip will
+// protrude slightly past the -X face (boss is 4 mm, wall is 3 mm).
+// The bolt threads through the boss + arm; the user holds an M4 nut against
+// the arm's outer face, which is accessible through the open +X side.
 module lower_mount_subtractions() {
-    // Bolt through-hole spans both sleeve walls at lower_bolt_z.
-    translate([0, 0, lower_bolt_z])
-        rotate([0, 90, 0])
-            cylinder(d = retainer_bolt_hole_d + bolt_clearance,
-                     h = sleeve_x_top + sleeve_x_bot,
-                     center = true);
-
-    // Inner cavity -X half-width at lower_bolt_z (interpolated over sleeve).
     z_frac_lo = (lower_bolt_z - (-sleeve_depth)) / sleeve_depth;
-    cavity_x_half_at_lo =
-        (cavity_x_bot + (cavity_x_top - cavity_x_bot) * z_frac_lo) / 2;
-
-    // Boss clearance recess: receives the arm's 15.8 mm boss on the -X cavity
-    // wall. Starts at the cavity wall (-cavity_x_half_at_lo) and cuts outward
-    // in -X. Will punch through the 3 mm sleeve wall, leaving an opening on
-    // the -X face large enough for the boss to seat.
-    translate([-cavity_x_half_at_lo, 0, lower_bolt_z])
-        rotate([0, 90, 0])
-            cylinder(d = retainer_boss_od + boss_recess_clearance,
-                     h = boss_recess_depth + eps);
-
-    // Outer (+X) sleeve half-width at lower_bolt_z (interpolated).
     sleeve_x_half_at_lo =
         (sleeve_x_bot + (sleeve_x_top - sleeve_x_bot) * z_frac_lo) / 2;
+    cavity_x_half_at_lo =
+        (cavity_x_bot + (cavity_x_top - cavity_x_bot) * z_frac_lo) / 2;
+    wall_span = sleeve_x_half_at_lo - cavity_x_half_at_lo;
 
-    // Hex nut pocket recessed into the +X outer face for an M4 nut.
-    // Opens outward (+X) so the nut is inserted from outside, then captured
-    // while the bolt is threaded in from the inner side.
-    translate([sleeve_x_half_at_lo - nut_pocket_depth, 0, lower_bolt_z])
-        rotate([0, -90, 0])
-            hex_pocket(hand_screw_nut_af, nut_pocket_depth + eps);
+    // Boss clearance: cylindrical hole through the entire -X wall.
+    translate([-sleeve_x_half_at_lo - eps, 0, lower_bolt_z])
+        rotate([0, 90, 0])
+            cylinder(d = retainer_boss_od + boss_recess_clearance,
+                     h = wall_span + 2 * eps);
 }
 
 // Upper bolt hole: through the upper body and the boss, axis = X.
