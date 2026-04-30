@@ -25,6 +25,8 @@
 // 1. TARGET HOLDER DIMENSIONS (measured)
 //==============================================================================
 
+render_mirrored_piece = false;
+
 // Arm cross-section (tapers linearly bottom -> top over arm_height)
 arm_x_bottom = 24;   // mm - "front view" width  (left-right, retainer bolt axis)
 arm_x_top    = 16;
@@ -191,10 +193,12 @@ module sleeve_shell() {
                     -sleeve_depth, 0);
         // Cavity, shifted +X by wall_thickness so it punches the +X wall
         // entirely while leaving the -X wall intact at full thickness.
+        // Cavity overshoots top (+eps) so it joins the upper body's cavity
+        // cleanly and leaves no thin slab at Z = 0.
         translate([wall_thickness, 0, 0])
             tapered_box(cavity_x_bot + 2 * wall_thickness, cavity_y_bot,
                         cavity_x_top + 2 * wall_thickness, cavity_y_top,
-                        -sleeve_depth - eps, 0 - eps);
+                        -sleeve_depth - eps, eps);
     }
 }
 
@@ -257,19 +261,17 @@ module top_boss() {
 // protrude slightly past the -X face (boss is 4 mm, wall is 3 mm).
 // The bolt threads through the boss + arm; the user holds an M4 nut against
 // the arm's outer face, which is accessible through the open +X side.
+//
+// The cylinder is centered at X = 0 and made longer than the full sleeve
+// width so it punches the -X wall cleanly at every Z within its vertical
+// extent (the sleeve tapers, so a per-Z fit would leave thin slivers at the
+// top/bottom of the boss cut). The +X half passes through open cavity.
 module lower_mount_subtractions() {
-    z_frac_lo = (lower_bolt_z - (-sleeve_depth)) / sleeve_depth;
-    sleeve_x_half_at_lo =
-        (sleeve_x_bot + (sleeve_x_top - sleeve_x_bot) * z_frac_lo) / 2;
-    cavity_x_half_at_lo =
-        (cavity_x_bot + (cavity_x_top - cavity_x_bot) * z_frac_lo) / 2;
-    wall_span = sleeve_x_half_at_lo - cavity_x_half_at_lo;
-
-    // Boss clearance: cylindrical hole through the entire -X wall.
-    translate([-sleeve_x_half_at_lo - eps, 0, lower_bolt_z])
+    translate([0, 0, lower_bolt_z])
         rotate([0, 90, 0])
             cylinder(d = retainer_boss_od + boss_recess_clearance,
-                     h = wall_span + 2 * eps);
+                     h = sleeve_x_bot * 2,
+                     center = true);
 }
 
 // Upper bolt hole: through the upper body and the boss, axis = X.
@@ -287,14 +289,17 @@ module upper_bolt_hole() {
 // passes through -Y wall, captive nut, cavity material, and into the inside
 // cylindrical boss. Stops just past the bolt axis so the screw tip presses
 // on the retainer bolt. Does NOT punch through to +Y — blind on +Y side.
+//
+// Start uses the worst-case -Y face position (at Z = 0 base of upper body,
+// where the body is widest) so the hole punches cleanly at every Z within
+// its vertical range despite the upper-body taper.
 module hand_screw_subtractions() {
-    z_frac = upper_bolt_z / extension_height;
-    y_outer_half =
-        (upper_outer_y_base + (upper_outer_y_topz - upper_outer_y_base) * z_frac) / 2;
-    hole_length = y_outer_half + hand_screw_blind_overshoot + eps;
-    translate([0, -y_outer_half - eps, upper_bolt_z])
+    start_y = -upper_outer_y_base / 2 - eps;
+    end_y   = hand_screw_blind_overshoot;
+    translate([0, start_y, upper_bolt_z])
         rotate([-90, 0, 0])
-            cylinder(d = hand_screw_thread_d + bolt_clearance, h = hole_length);
+            cylinder(d = hand_screw_thread_d + bolt_clearance,
+                     h = end_y - start_y);
 }
 
 // Nut nook: rectangular slot inside the inside boss, holding the hand-screw
@@ -351,9 +356,11 @@ assembly_gap = 60;  // mm - visual separation in preview
 module assembly() {
     translate([assembly_gap / 2, 0, 0])
         extension_piece();
-    translate([-assembly_gap / 2, 0, 0])
-        mirror([1, 0, 0])
-            extension_piece();
+
+    if (render_mirrored_piece)
+        translate([-assembly_gap / 2, 0, 0])
+            mirror([1, 0, 0])
+                extension_piece();
 }
 
 assembly();
