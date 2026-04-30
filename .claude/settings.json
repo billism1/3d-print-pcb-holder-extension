@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"C:\\\\Program Files\\\\OpenSCAD\\\\openscad.exe\" -o \"$env:TEMP\\\\pcb-holder-extension-test.stl\" \"src\\\\pcb-holder-extension.scad\" 2>&1 | Out-String)"
+    ]
+  }
+}
