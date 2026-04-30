@@ -53,6 +53,19 @@ extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 35;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
+// Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
+// the ceiling matches the side walls. Increase to lower the ceiling: the
+// arm seats deeper into the sleeve, and the lower bolt hole position
+// follows automatically (see derived `lower_bolt_z`).
+// Example: set to wall_thickness + 2 to lower the ceiling by 2 mm.
+sleeve_ceiling_thickness = wall_thickness;   // mm
+
+// Optional manual Z offset for the lower bolt hole, on top of the auto
+// position derived from where the arm seats. Positive moves the hole up
+// (less negative Z), negative moves it down. Use to fine-tune alignment
+// with the actual arm if measurements drift.
+lower_bolt_z_tweak = 0;   // mm
+
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
 // X axis. Shrinks the outer body width by this amount on the open (+X) side
 // only so the -X wall position is preserved and the +X face moves inward.
@@ -153,8 +166,17 @@ upper_outer_y_base = upper_y_base + 2 * wall_thickness;
 upper_outer_x_topz = upper_x_topz + 2 * wall_thickness;
 upper_outer_y_topz = upper_y_topz + 2 * wall_thickness;
 
-// Lower bolt hole Z (in extension coords; arm top at Z = 0; arm bolt 15 mm down)
-lower_bolt_z = -(arm_height - retainer_bolt_z_from_bottom);  // = -15
+// Where the arm's top seats in the sleeve. With a ceiling, the arm stops
+// against the underside of the ceiling material at Z = -sleeve_ceiling_thickness.
+arm_seat_top_z = -sleeve_ceiling_thickness;
+
+// Lower bolt hole Z (in extension coords). The arm's bolt is
+// (arm_height - retainer_bolt_z_from_bottom) below the arm's top, so the
+// bolt's Z relative to the extension is the seat position minus that offset.
+// Add the manual tweak for fine alignment.
+lower_bolt_z = arm_seat_top_z
+             - (arm_height - retainer_bolt_z_from_bottom)
+             + lower_bolt_z_tweak;
 
 // Upper bolt hole Z (mirrors arm geometry, measured from extension top)
 upper_bolt_z = extension_height - top_bolt_offset_from_top;
@@ -227,7 +249,7 @@ module sleeve_shell() {
         translate([wall_thickness, 0, 0])
             tapered_box(cavity_x_bot + 2 * wall_thickness, cavity_y_bot,
                         cavity_x_top + 2 * wall_thickness, cavity_y_top,
-                        -sleeve_depth - eps, -wall_thickness);
+                        -sleeve_depth - eps, arm_seat_top_z);
     }
 }
 
