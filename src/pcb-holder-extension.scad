@@ -87,7 +87,12 @@ nut_nook_y_center = -6.0;     // mm - Y of nut center along hand-screw path
 
 // Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
 // Does NOT punch through the +Y wall.
-hand_screw_blind_overshoot = 1;   // mm past bolt axis (into inside boss material)
+hand_screw_blind_overshoot = 0.5;   // mm past bolt axis (into inside boss material)
+
+// External top boss is hollowed into a stubby tube so the PCB bracket's
+// round peg can insert into it. Wall thickness is the radial material left
+// between the inlet (ID) and the boss OD.
+top_boss_wall = wall_thickness;   // mm - radial wall of the boss tube
 
 //==============================================================================
 // 3. TOLERANCES
@@ -102,7 +107,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 64;
+$fn = 164;
 $fa = 0.5;
 $fs = 0.1;
 
@@ -251,6 +256,20 @@ module top_boss() {
             cylinder(d = retainer_boss_od, h = retainer_boss_protrude);
 }
 
+// Top boss inlet: hollows the external boss into a tube (stubby pipe) so
+// the PCB bracket's round peg can insert into it. Cuts a cylindrical pocket
+// through the full boss protrusion, stopping at the body's -X outer face so
+// the wall material stays intact and continues to carry the bolt hole.
+module top_boss_inlet() {
+    z_frac = upper_bolt_z / extension_height;
+    x_outer_half_at_z =
+        (upper_outer_x_base + (upper_outer_x_topz - upper_outer_x_base) * z_frac) / 2;
+    inlet_id = retainer_boss_od - 2 * top_boss_wall;
+    translate([-x_outer_half_at_z - retainer_boss_protrude - eps, 0, upper_bolt_z])
+        rotate([0, 90, 0])
+            cylinder(d = inlet_id, h = retainer_boss_protrude + eps);
+}
+
 //==============================================================================
 // 8. SUBTRACTIONS (holes + nut pockets)
 //==============================================================================
@@ -339,6 +358,7 @@ module extension_piece() {
         }
         lower_mount_subtractions();
         upper_bolt_hole();
+        top_boss_inlet();
         hand_screw_subtractions();
         nut_nook_subtraction();
     }
