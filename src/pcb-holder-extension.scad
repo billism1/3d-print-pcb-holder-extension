@@ -39,8 +39,9 @@ retainer_boss_od            = 15.8;  // mm - boss OD on the inner side face
 retainer_boss_protrude      = 4;     // mm - how far the boss sticks toward center
 
 // Hand screw (locks the retainer bolt; threads in from front-or-back face)
-hand_screw_thread_d = 3.85;  // mm - measured at thread crests
-hand_screw_nut_af   = 7;     // mm - hex nut, across-flats (M4)
+hand_screw_thread_d  = 3.85;  // mm - measured at thread crests
+hand_screw_nut_af    = 7;     // mm - hex nut, across-flats (M4)
+hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 
 //==============================================================================
 // 2. EXTENSION PARAMETERS
@@ -57,6 +58,21 @@ top_bolt_offset_from_top = 15;
 // 15.8 mm boss seat fully through the wall. With wall_thickness < boss
 // protrusion, this hole punches all the way through the -X wall.
 boss_recess_clearance = 0.4;   // mm - added to OD for slip fit over boss
+
+// Inside boss: a chunk of material added to the cavity side of the -X wall
+// around the upper bolt hole. Reinforces the bolt mount and houses the
+// hand-screw nut nook. Spans the full cavity Y so it ends flush with the
+// +Y/-Y inner walls.
+inside_boss_x_depth  = 8;    // mm - extent into cavity in +X
+inside_boss_z_height = 13;   // mm - vertical extent (Z), centered on upper_bolt_z
+
+// Hand-screw nut nook (rectangular slot inside the inside boss).
+// Opens on +X so the nut is loaded through the open outer face during
+// assembly. Floor and ceiling within the boss capture the nut vertically.
+nut_nook_x_clear = 0.5;   // mm - radial clearance past hex AV
+nut_nook_y_clear = 0.4;   // mm - axial clearance past nut thickness
+nut_nook_z_clear = 0.4;   // mm - vertical clearance past hex AF
+nut_nook_y_center = -5;   // mm - Y of nut center along hand-screw path
 
 //==============================================================================
 // 3. TOLERANCES
@@ -115,6 +131,17 @@ lower_bolt_z = -(arm_height - retainer_bolt_z_from_bottom);  // = -15
 // Upper bolt hole Z (mirrors arm geometry, measured from extension top)
 upper_bolt_z = extension_height - top_bolt_offset_from_top;
 
+// Upper-section cavity stops wall_thickness below the top to leave a solid
+// roof. cap_inner_x/y are the cavity inner dimensions at that capped height.
+cavity_top_z = extension_height - wall_thickness;
+cap_inner_x  = upper_x_base + (upper_x_topz - upper_x_base) * (cavity_top_z / extension_height);
+cap_inner_y  = upper_y_base + (upper_y_topz - upper_y_base) * (cavity_top_z / extension_height);
+
+// Cavity inner dimensions at upper_bolt_z (linear interp from base to cap).
+ub_z_frac      = upper_bolt_z / cavity_top_z;
+cavity_x_at_ub = upper_x_base + (cap_inner_x - upper_x_base) * ub_z_frac;
+cavity_y_at_ub = upper_y_base + (cap_inner_y - upper_y_base) * ub_z_frac;
+
 //==============================================================================
 // 6. HELPER MODULES
 //==============================================================================
@@ -162,12 +189,6 @@ module sleeve_shell() {
 // extended upward by extension_height. Walls remain on -X, +Y, -Y, plus a
 // solid top cap of wall_thickness sealing the top.
 module upper_body() {
-    // Cavity stops wall_thickness below the top to leave a solid roof.
-    cavity_top_z = extension_height - wall_thickness;
-    // Interpolate inner cavity dimensions at cavity_top_z (linear taper).
-    z_frac = cavity_top_z / extension_height;
-    cap_inner_x = upper_x_base + (upper_x_topz - upper_x_base) * z_frac;
-    cap_inner_y = upper_y_base + (upper_y_topz - upper_y_base) * z_frac;
     difference() {
         tapered_box(upper_outer_x_base, upper_outer_y_base,
                     upper_outer_x_topz, upper_outer_y_topz,
@@ -178,6 +199,21 @@ module upper_body() {
                         cap_inner_x + 2 * wall_thickness, cap_inner_y,
                         0 - eps, cavity_top_z);
     }
+}
+
+// Inside boss: rectangular block on the cavity side of the -X wall, around
+// the upper bolt hole. Reinforces the bolt mount and houses the hand-screw
+// nut nook. Y-dimension uses the cavity width at upper_bolt_z (small over/
+// undershoot at the block's Z extremes is harmless — just adds a sliver into
+// the side wall material at the top, leaves a sliver gap at the bottom).
+module inside_boss() {
+    // -X cavity face at upper_bolt_z (the cavity X half-width with +X-shift
+    // and 2*wall widening cancel out on the -X side, leaving -cavity_x_at_ub/2).
+    cavity_x_face = -cavity_x_at_ub / 2;
+    block_center_x = cavity_x_face + inside_boss_x_depth / 2;
+    translate([block_center_x, 0, upper_bolt_z])
+        cube([inside_boss_x_depth, cavity_y_at_ub, inside_boss_z_height],
+             center = true);
 }
 
 // Boss on the inner side face (-X side) at the upper bolt height.
@@ -227,23 +263,39 @@ module upper_bolt_hole() {
             cylinder(d = retainer_bolt_hole_d + bolt_clearance, h = L);
 }
 
-// Hand screw: through-hole along Y at upper_bolt_z + hex pocket on -Y face.
-// The hole intersects upper_bolt_hole so the screw tip can press on the bolt.
+// Hand-screw through-hole along Y at upper_bolt_z. Passes through the -Y wall,
+// the inside boss (and the nut seated in the nook), and the +Y wall. The hole
+// intersects upper_bolt_hole so the screw tip can press on the bolt.
 module hand_screw_subtractions() {
     z_frac = upper_bolt_z / extension_height;
     y_outer_half =
         (upper_outer_y_base + (upper_outer_y_topz - upper_outer_y_base) * z_frac) / 2;
-
-    // Through-hole along Y for the threaded shaft.
     translate([0, -y_outer_half - eps, upper_bolt_z])
         rotate([-90, 0, 0])
             cylinder(d = hand_screw_thread_d + bolt_clearance,
                      h = 2 * y_outer_half + 2 * eps);
+}
 
-    // Hex nut pocket on -Y face. rotate([90,0,0]) maps +Z -> -Y.
-    translate([0, -y_outer_half + nut_pocket_depth, upper_bolt_z])
-        rotate([90, 0, 0])
-            hex_pocket(hand_screw_nut_af, nut_pocket_depth + eps);
+// Nut nook: rectangular slot inside the inside boss, holding the hand-screw
+// hex nut. Open on +X (extends well past the +X face of the body so the nut
+// is loaded from outside through the open cavity). Floor and ceiling within
+// the boss block capture the nut vertically; the slot's -Y end backs up the
+// nut axially when the screw is tightened.
+module nut_nook_subtraction() {
+    nut_av = hand_screw_nut_af / cos(30);
+    nx = nut_av                + 2 * nut_nook_x_clear;   // X: hex AV + clearance
+    ny = hand_screw_nut_thick  + 2 * nut_nook_y_clear;   // Y: nut thickness + clearance
+    nz = hand_screw_nut_af     + 2 * nut_nook_z_clear;   // Z: hex AF + clearance
+
+    // Slot extends from -nx/2 (deepest into block) to well past the +X face
+    // of the body so it is fully open on +X.
+    slot_x_min = -nx / 2;
+    slot_x_far = upper_outer_x_base / 2 + 20;
+    slot_x_size  = slot_x_far - slot_x_min;
+    slot_x_center = (slot_x_min + slot_x_far) / 2;
+
+    translate([slot_x_center, nut_nook_y_center, upper_bolt_z])
+        cube([slot_x_size, ny, nz], center = true);
 }
 
 //==============================================================================
@@ -256,10 +308,12 @@ module extension_piece() {
             sleeve_shell();
             upper_body();
             top_boss();
+            inside_boss();
         }
         lower_mount_subtractions();
         upper_bolt_hole();
         hand_screw_subtractions();
+        nut_nook_subtraction();
     }
 }
 
