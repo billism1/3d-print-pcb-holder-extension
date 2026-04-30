@@ -35,7 +35,7 @@ arm_y_top    = 20;
 arm_height   = 80;   // mm
 
 // Retainer-bolt hole on the arm
-retainer_bolt_hole_d        = 4;     // mm
+retainer_bolt_hole_d        = 5;     // mm
 retainer_bolt_z_from_bottom = 65;    // mm - center of hole, from arm bottom
 retainer_boss_od            = 15.8;  // mm - boss OD on the inner side face
 retainer_boss_protrude      = 4;     // mm - how far the boss sticks toward center
@@ -87,7 +87,7 @@ nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // m
 // the slot's -Y wall backs up the nut when the screw is tightened.
 nut_nook_x_clear  = 0.5;    // mm - radial clearance past hex AV
 nut_nook_y_clear  = 0.4;    // mm - axial clearance past nut thickness
-nut_nook_z_clear  = 0.4;    // mm - vertical clearance past hex AF
+nut_nook_z_clear  = 0.2;    // mm - vertical clearance past hex AF
 nut_nook_y_center = -6.0;     // mm - Y of nut center along hand-screw path
 
 // Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
