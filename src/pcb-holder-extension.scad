@@ -31,7 +31,7 @@ render_mirrored_piece = false;
 arm_x_bottom = 24;   // mm - "front view" width  (left-right, retainer bolt axis)
 arm_x_top    = 16;
 arm_y_bottom = 30;   // mm - "side view" width   (front-to-back, hand screw axis)
-arm_y_top    = 19;
+arm_y_top    = 20;
 arm_height   = 80;   // mm
 
 // Retainer-bolt hole on the arm
@@ -51,7 +51,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 
 extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 35;   // mm - how far the sleeve covers the arm from the top
-wall_thickness   = 3;    // mm
+wall_thickness   = 2;    // mm
 
 // Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
 // the ceiling matches the side walls. Increase to lower the ceiling: the
@@ -72,7 +72,7 @@ lower_bolt_z_tweak = 0;   // mm
 wall_x_trim      = 4;    // mm
 
 // Mirrors original arm: top mounting hole this far below extension top
-top_bolt_offset_from_top = 15;
+top_bolt_offset_from_top = 10;
 
 // Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
 // 15.8 mm boss seat fully through the wall. With wall_thickness < boss
@@ -101,7 +101,7 @@ nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // m
 nut_nook_x_clear  = 0.5;    // mm - radial clearance past hex AV
 nut_nook_y_clear  = 0.4;    // mm - axial clearance past nut thickness
 nut_nook_z_clear  = 0.2;    // mm - vertical clearance past hex AF
-nut_nook_y_center = -5.5;     // mm - Y of nut center along hand-screw path
+nut_nook_y_center = -6.15;     // mm - Y of nut center along hand-screw path
 
 // Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
 // Does NOT punch through the +Y wall.
