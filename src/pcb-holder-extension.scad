@@ -53,6 +53,11 @@ extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 25;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
+// Trim length of the side walls (+Y, -Y) and the closed -X wall along the
+// X axis. Shrinks the outer body width by this amount on the open (+X) side
+// only so the -X wall position is preserved and the +X face moves inward.
+wall_x_trim      = 4;    // mm
+
 // Mirrors original arm: top mounting hole this far below extension top
 top_bolt_offset_from_top = 15;
 
@@ -107,7 +112,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 164;
+$fn = 64;
 $fa = 0.5;
 $fs = 0.1;
 
@@ -193,9 +198,13 @@ module hex_pocket(af, depth) {
 // The arm and its protruding boss enter through the open +X side.
 module sleeve_shell() {
     difference() {
-        tapered_box(sleeve_x_bot, sleeve_y_bot,
-                    sleeve_x_top, sleeve_y_top,
-                    -sleeve_depth, 0);
+        // Outer trimmed by wall_x_trim on the +X side (the open side).
+        // Width is reduced and the body shifted -X by half the trim, keeping
+        // the -X wall position unchanged.
+        translate([-wall_x_trim / 2, 0, 0])
+            tapered_box(sleeve_x_bot - wall_x_trim, sleeve_y_bot,
+                        sleeve_x_top - wall_x_trim, sleeve_y_top,
+                        -sleeve_depth, 0);
         // Cavity, shifted +X by wall_thickness so it punches the +X wall
         // entirely while leaving the -X wall intact at full thickness.
         // Cavity overshoots top (+eps) so it joins the upper body's cavity
@@ -212,9 +221,12 @@ module sleeve_shell() {
 // solid top cap of wall_thickness sealing the top.
 module upper_body() {
     difference() {
-        tapered_box(upper_outer_x_base, upper_outer_y_base,
-                    upper_outer_x_topz, upper_outer_y_topz,
-                    0, extension_height);
+        // Outer trimmed by wall_x_trim on the +X side (the open side).
+        // Same trim+shift pattern as sleeve_shell, preserving -X wall position.
+        translate([-wall_x_trim / 2, 0, 0])
+            tapered_box(upper_outer_x_base - wall_x_trim, upper_outer_y_base,
+                        upper_outer_x_topz - wall_x_trim, upper_outer_y_topz,
+                        0, extension_height);
         // Cavity, open on +X, sealed at the top by wall_thickness.
         translate([wall_thickness, 0, 0])
             tapered_box(upper_x_base + 2 * wall_thickness, upper_y_base,
