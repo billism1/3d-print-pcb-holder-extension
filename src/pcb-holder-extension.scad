@@ -59,20 +59,33 @@ top_bolt_offset_from_top = 15;
 // protrusion, this hole punches all the way through the -X wall.
 boss_recess_clearance = 0.4;   // mm - added to OD for slip fit over boss
 
-// Inside boss: a chunk of material added to the cavity side of the -X wall
-// around the upper bolt hole. Reinforces the bolt mount and houses the
-// hand-screw nut nook. Spans the full cavity Y so it ends flush with the
-// +Y/-Y inner walls.
-inside_boss_x_depth  = 8;    // mm - extent into cavity in +X
-inside_boss_z_height = 13;   // mm - vertical extent (Z), centered on upper_bolt_z
+// Inside boss: cylindrical sleeve on the cavity side of the -X wall around
+// the upper bolt hole. Mimics the round wall on the original arm interior —
+// reinforces the bolt mount with 3 mm of wall material around the 4 mm hole.
+inside_boss_od     = 10;    // mm - OD (3 mm wall around 4 mm bolt hole)
+inside_boss_length = 10;     // mm - extent into cavity in +X direction
 
-// Hand-screw nut nook (rectangular slot inside the inside boss).
+// Nut holder block: rectangular block adjacent to the inside cyl boss on
+// the -Y side. Provides material for the hand-screw nut nook with floor +
+// ceiling capture. Overlaps the cylindrical boss so they merge into one
+// solid mass.
+nut_holder_wall_thickness = wall_thickness;
+nut_holder_x      = inside_boss_length;                                     // mm - X depth into cavity from -X cavity face
+nut_holder_y_to   = -2;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
+nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // mm - vertical height (centered on upper_bolt_z)
+
+// Hand-screw nut nook (rectangular slot inside the nut holder block).
 // Opens on +X so the nut is loaded through the open outer face during
-// assembly. Floor and ceiling within the boss capture the nut vertically.
-nut_nook_x_clear = 0.5;   // mm - radial clearance past hex AV
-nut_nook_y_clear = 0.4;   // mm - axial clearance past nut thickness
-nut_nook_z_clear = 0.4;   // mm - vertical clearance past hex AF
-nut_nook_y_center = -5;   // mm - Y of nut center along hand-screw path
+// assembly. Floor and ceiling within the block capture the nut vertically;
+// the slot's -Y wall backs up the nut when the screw is tightened.
+nut_nook_x_clear  = 0.5;    // mm - radial clearance past hex AV
+nut_nook_y_clear  = 0.4;    // mm - axial clearance past nut thickness
+nut_nook_z_clear  = 0.4;    // mm - vertical clearance past hex AF
+nut_nook_y_center = -5;     // mm - Y of nut center along hand-screw path
+
+// Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
+// Does NOT punch through the +Y wall.
+hand_screw_blind_overshoot = 1;   // mm past bolt axis (into inside boss material)
 
 //==============================================================================
 // 3. TOLERANCES
@@ -140,7 +153,7 @@ cap_inner_y  = upper_y_base + (upper_y_topz - upper_y_base) * (cavity_top_z / ex
 // Cavity inner dimensions at upper_bolt_z (linear interp from base to cap).
 ub_z_frac      = upper_bolt_z / cavity_top_z;
 cavity_x_at_ub = upper_x_base + (cap_inner_x - upper_x_base) * ub_z_frac;
-cavity_y_at_ub = upper_y_base + (cap_inner_y - upper_y_base) * ub_z_frac;
+cavity_y_at_ub = upper_y_base + (cap_inner_y - upper_y_base) * ub_z_frac + 1;
 
 //==============================================================================
 // 6. HELPER MODULES
@@ -201,19 +214,26 @@ module upper_body() {
     }
 }
 
-// Inside boss: rectangular block on the cavity side of the -X wall, around
-// the upper bolt hole. Reinforces the bolt mount and houses the hand-screw
-// nut nook. Y-dimension uses the cavity width at upper_bolt_z (small over/
-// undershoot at the block's Z extremes is harmless — just adds a sliver into
-// the side wall material at the top, leaves a sliver gap at the bottom).
-module inside_boss() {
-    // -X cavity face at upper_bolt_z (the cavity X half-width with +X-shift
-    // and 2*wall widening cancel out on the -X side, leaving -cavity_x_at_ub/2).
+// Inside cylindrical boss: round wall around the upper bolt hole on the
+// cavity side of the -X wall. Sits coaxial with the bolt hole; will be cut
+// open by upper_bolt_hole() to form a sleeve.
+module inside_cyl_boss() {
     cavity_x_face = -cavity_x_at_ub / 2;
-    block_center_x = cavity_x_face + inside_boss_x_depth / 2;
-    translate([block_center_x, 0, upper_bolt_z])
-        cube([inside_boss_x_depth, cavity_y_at_ub, inside_boss_z_height],
-             center = true);
+    translate([cavity_x_face, 0, upper_bolt_z])
+        rotate([0, 90, 0])
+            cylinder(d = inside_boss_od, h = inside_boss_length);
+}
+
+// Nut holder: rectangular block on the -Y side of the inside cyl boss, hosts
+// the captive hand-screw nut. Overlaps the cylindrical boss so the two merge.
+module nut_holder() {
+    cavity_x_face = -cavity_x_at_ub / 2;
+    cavity_y_face = -cavity_y_at_ub / 2;
+    by_size  = nut_holder_y_to - cavity_y_face;
+    bx_center = cavity_x_face + nut_holder_x / 2;
+    by_center = ((cavity_y_face + nut_holder_y_to) / 2);
+    translate([bx_center, by_center, upper_bolt_z])
+        cube([nut_holder_x, by_size, nut_holder_z], center = true);
 }
 
 // Boss on the inner side face (-X side) at the upper bolt height.
@@ -263,17 +283,18 @@ module upper_bolt_hole() {
             cylinder(d = retainer_bolt_hole_d + bolt_clearance, h = L);
 }
 
-// Hand-screw through-hole along Y at upper_bolt_z. Passes through the -Y wall,
-// the inside boss (and the nut seated in the nook), and the +Y wall. The hole
-// intersects upper_bolt_hole so the screw tip can press on the bolt.
+// Hand-screw blind hole along Y at upper_bolt_z. Enters from -Y outer face,
+// passes through -Y wall, captive nut, cavity material, and into the inside
+// cylindrical boss. Stops just past the bolt axis so the screw tip presses
+// on the retainer bolt. Does NOT punch through to +Y — blind on +Y side.
 module hand_screw_subtractions() {
     z_frac = upper_bolt_z / extension_height;
     y_outer_half =
         (upper_outer_y_base + (upper_outer_y_topz - upper_outer_y_base) * z_frac) / 2;
+    hole_length = y_outer_half + hand_screw_blind_overshoot + eps;
     translate([0, -y_outer_half - eps, upper_bolt_z])
         rotate([-90, 0, 0])
-            cylinder(d = hand_screw_thread_d + bolt_clearance,
-                     h = 2 * y_outer_half + 2 * eps);
+            cylinder(d = hand_screw_thread_d + bolt_clearance, h = hole_length);
 }
 
 // Nut nook: rectangular slot inside the inside boss, holding the hand-screw
@@ -308,7 +329,8 @@ module extension_piece() {
             sleeve_shell();
             upper_body();
             top_boss();
-            inside_boss();
+            inside_cyl_boss();
+            nut_holder();
         }
         lower_mount_subtractions();
         upper_bolt_hole();
