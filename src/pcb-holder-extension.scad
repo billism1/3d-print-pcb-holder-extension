@@ -81,7 +81,7 @@ nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // m
 nut_nook_x_clear  = 0.5;    // mm - radial clearance past hex AV
 nut_nook_y_clear  = 0.4;    // mm - axial clearance past nut thickness
 nut_nook_z_clear  = 0.4;    // mm - vertical clearance past hex AF
-nut_nook_y_center = -5;     // mm - Y of nut center along hand-screw path
+nut_nook_y_center = -6.0;     // mm - Y of nut center along hand-screw path
 
 // Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
 // Does NOT punch through the +Y wall.
