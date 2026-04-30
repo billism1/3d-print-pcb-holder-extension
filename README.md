@@ -50,17 +50,49 @@ The extension pieces:
 
 ## Repository Layout
 
-- `src/`  
-  OpenSCAD source files for the extension design.
-  - Parametric design allowing customization for different holder sizes.
-  - Includes tolerance values optimized for FDM 3D printing.
+- `src/pcb-holder-extension.scad`  
+  Parametric OpenSCAD source for the extension. Modify the variables at the top of the file to match your specific holder.
 
 - `publication/`  
   Platform-specific release folders.
   - In derived repos, create one subfolder per destination platform.
   - Examples: `publication/MakerWorld/`, `publication/Printables/`.
 
-Each top-level folder includes its own `README.md` with folder-specific guidance.
+## Customization Parameters
+
+Edit the top of `src/pcb-holder-extension.scad` to match your holder.
+
+### Target arm (measured)
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `arm_x_bottom` / `arm_x_top` | 24 / 16 mm | Arm width (front view, retainer-bolt axis) |
+| `arm_y_bottom` / `arm_y_top` | 30 / 20 mm | Arm depth (side view, hand-screw axis) |
+| `arm_height` | 80 mm | Total height of the vertical arm |
+| `retainer_bolt_hole_d` | 4 mm | Diameter of the retainer bolt hole |
+| `retainer_bolt_z_from_bottom` | 65 mm | Bolt-hole center, measured from arm bottom |
+| `retainer_boss_od` | 15.8 mm | OD of the boss around the bolt hole on the inner face |
+| `retainer_boss_protrude` | 4 mm | How far the boss sticks toward the PCB |
+| `hand_screw_thread_d` | 3.85 mm | Hand-screw thread OD (M4-ish) |
+| `hand_screw_nut_af` | 7 mm | Hex nut across-flats (M4) |
+
+### Extension shape
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `extension_height` | 40 mm | Extra height above the original arm |
+| `sleeve_depth` | 25 mm | How far the sleeve covers the arm from the top |
+| `wall_thickness` | 3 mm | Wall thickness of the C-channel and top cap |
+| `top_bolt_offset_from_top` | 15 mm | Mirrors the original arm: top bolt this far below extension top |
+
+### FDM tolerances
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `surface_tolerance` | 0.2 mm | Per-side clearance between sleeve cavity and arm |
+| `bolt_clearance` | 0.3 mm | Oversize for bolt through-holes |
+| `boss_recess_clearance` | 0.4 mm | Slip-fit clearance over the arm's boss |
+| `nut_pocket_depth` | 3 mm | Depth of hex nut pockets |
 
 ## Design Specifications
 
