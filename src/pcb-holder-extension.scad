@@ -50,7 +50,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 //==============================================================================
 
 extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
-sleeve_depth     = 25;   // mm - how far the sleeve covers the arm from the top
+sleeve_depth     = 35;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
