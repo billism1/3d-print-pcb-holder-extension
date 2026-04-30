@@ -31,7 +31,7 @@ render_mirrored_piece = false;
 arm_x_bottom = 24;   // mm - "front view" width  (left-right, retainer bolt axis)
 arm_x_top    = 16;
 arm_y_bottom = 30;   // mm - "side view" width   (front-to-back, hand screw axis)
-arm_y_top    = 20;
+arm_y_top    = 19;
 arm_height   = 80;   // mm
 
 // Retainer-bolt hole on the arm
@@ -101,7 +101,7 @@ nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // m
 nut_nook_x_clear  = 0.5;    // mm - radial clearance past hex AV
 nut_nook_y_clear  = 0.4;    // mm - axial clearance past nut thickness
 nut_nook_z_clear  = 0.2;    // mm - vertical clearance past hex AF
-nut_nook_y_center = -6.0;     // mm - Y of nut center along hand-screw path
+nut_nook_y_center = -5.5;     // mm - Y of nut center along hand-screw path
 
 // Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
 // Does NOT punch through the +Y wall.
