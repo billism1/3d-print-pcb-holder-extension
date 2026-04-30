@@ -170,6 +170,16 @@ ub_z_frac      = upper_bolt_z / cavity_top_z;
 cavity_x_at_ub = upper_x_base + (cap_inner_x - upper_x_base) * ub_z_frac;
 cavity_y_at_ub = upper_y_base + (cap_inner_y - upper_y_base) * ub_z_frac + 1;
 
+// Top boss attachment X. Position uses the body's -X face at the TOP of the
+// boss's vertical extent (Z = upper_bolt_z + boss_radius), where the upper
+// body is narrowest. This guarantees the boss reaches the wall at the top of
+// its circle (no gap there); at lower Z the body extends further -X so the
+// boss embeds into the wall — a clean union, not a gap.
+top_boss_top_z   = upper_bolt_z + retainer_boss_od / 2;
+top_boss_x_face  = -(upper_outer_x_base
+                     + (upper_outer_x_topz - upper_outer_x_base)
+                       * (top_boss_top_z / extension_height)) / 2;
+
 //==============================================================================
 // 6. HELPER MODULES
 //==============================================================================
@@ -264,25 +274,23 @@ module nut_holder() {
 
 // Boss on the inner side face (-X side) at the upper bolt height.
 // Matches the original arm boss so the PCB bracket can remount here.
+// Positioned at top_boss_x_face — the body's -X face at the TOP of the boss
+// circle — so the boss reaches the body all the way around its perimeter
+// despite the upper-body taper.
 module top_boss() {
-    z_frac = upper_bolt_z / extension_height;
-    x_outer_half_at_z =
-        (upper_outer_x_base + (upper_outer_x_topz - upper_outer_x_base) * z_frac) / 2;
-    translate([-x_outer_half_at_z, 0, upper_bolt_z])
+    translate([top_boss_x_face, 0, upper_bolt_z])
         rotate([0, -90, 0])
             cylinder(d = retainer_boss_od, h = retainer_boss_protrude);
 }
 
 // Top boss inlet: hollows the external boss into a tube (stubby pipe) so
 // the PCB bracket's round peg can insert into it. Cuts a cylindrical pocket
-// through the full boss protrusion, stopping at the body's -X outer face so
-// the wall material stays intact and continues to carry the bolt hole.
+// through the full boss protrusion, stopping at top_boss_x_face (the boss's
+// inner attachment plane). The wall material behind the inlet stays intact
+// and continues to carry the bolt hole.
 module top_boss_inlet() {
-    z_frac = upper_bolt_z / extension_height;
-    x_outer_half_at_z =
-        (upper_outer_x_base + (upper_outer_x_topz - upper_outer_x_base) * z_frac) / 2;
     inlet_id = retainer_boss_od - 2 * top_boss_wall;
-    translate([-x_outer_half_at_z - retainer_boss_protrude - eps, 0, upper_bolt_z])
+    translate([top_boss_x_face - retainer_boss_protrude - eps, 0, upper_bolt_z])
         rotate([0, 90, 0])
             cylinder(d = inlet_id, h = retainer_boss_protrude + eps);
 }
