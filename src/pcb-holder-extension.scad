@@ -136,14 +136,17 @@ sleeve_y_top = cavity_y_top + 2 * wall_thickness;
 sleeve_x_bot = cavity_x_bot + 2 * wall_thickness;
 sleeve_y_bot = cavity_y_bot + 2 * wall_thickness;
 
-// Upper body continues the arm taper rates above Z = 0
+// Upper body continues the arm taper rates above Z = 0.
+// Base cavity dimensions match the sleeve cavity at its top (Z = 0) so the
+// outer body dimensions match across the sleeve/upper body seam — making
+// the exterior continuous (no visible step at Z = 0).
 x_taper_rate = (arm_x_bottom - arm_x_top) / arm_height;
 y_taper_rate = (arm_y_bottom - arm_y_top) / arm_height;
 
-upper_x_base = arm_x_top;
-upper_y_base = arm_y_top;
-upper_x_topz = arm_x_top - x_taper_rate * extension_height;
-upper_y_topz = arm_y_top - y_taper_rate * extension_height;
+upper_x_base = arm_x_top + 2 * surface_tolerance;
+upper_y_base = arm_y_top + 2 * surface_tolerance;
+upper_x_topz = upper_x_base - x_taper_rate * extension_height;
+upper_y_topz = upper_y_base - y_taper_rate * extension_height;
 
 upper_outer_x_base = upper_x_base + 2 * wall_thickness;
 upper_outer_y_base = upper_y_base + 2 * wall_thickness;
@@ -207,12 +210,14 @@ module sleeve_shell() {
                         -sleeve_depth, 0);
         // Cavity, shifted +X by wall_thickness so it punches the +X wall
         // entirely while leaving the -X wall intact at full thickness.
-        // Cavity overshoots top (+eps) so it joins the upper body's cavity
-        // cleanly and leaves no thin slab at Z = 0.
+        // Cavity stops wall_thickness below the top of the sleeve so the
+        // top of the sleeve becomes a horizontal ceiling (also acts as the
+        // floor for the upper body interior). The arm seats with its top
+        // against this ceiling at Z = -wall_thickness.
         translate([wall_thickness, 0, 0])
             tapered_box(cavity_x_bot + 2 * wall_thickness, cavity_y_bot,
                         cavity_x_top + 2 * wall_thickness, cavity_y_top,
-                        -sleeve_depth - eps, eps);
+                        -sleeve_depth - eps, -wall_thickness);
     }
 }
 
