@@ -64,7 +64,9 @@ sleeve_ceiling_thickness = wall_thickness;   // mm
 // position derived from where the arm seats. Positive moves the hole up
 // (less negative Z), negative moves it down. Use to fine-tune alignment
 // with the actual arm if measurements drift.
-lower_bolt_z_tweak = 2;   // mm
+lower_bolt_z_tweak = 4;   // mm
+
+raise_base_ext_sep_wall = 2;
 
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
 // X axis. Shrinks the outer body width by this amount on the open (+X) side
@@ -168,7 +170,7 @@ upper_outer_y_topz = upper_y_topz + 2 * wall_thickness;
 
 // Where the arm's top seats in the sleeve. With a ceiling, the arm stops
 // against the underside of the ceiling material at Z = -sleeve_ceiling_thickness.
-arm_seat_top_z = -sleeve_ceiling_thickness;
+arm_seat_top_z = -sleeve_ceiling_thickness - raise_base_ext_sep_wall;
 
 // Lower bolt hole Z (in extension coords). The arm's bolt is
 // (arm_height - retainer_bolt_z_from_bottom) below the arm's top, so the
