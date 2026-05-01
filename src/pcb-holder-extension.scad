@@ -85,7 +85,7 @@ boss_recess_clearance = -0.45;   // mm - added to OD for slip fit over boss
 // the upper bolt hole. Mimics the round wall on the original arm interior —
 // reinforces the bolt mount with 3 mm of wall material around the 4 mm hole.
 inside_boss_od     = 10;    // mm - OD (3 mm wall around 4 mm bolt hole)
-inside_boss_length = 10;     // mm - extent into cavity in +X direction
+inside_boss_length = 12;     // mm - extent into cavity in +X direction
 
 // Nut holder block: rectangular block adjacent to the inside cyl boss on
 // the -Y side. Provides material for the hand-screw nut nook with floor +
