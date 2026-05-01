@@ -38,7 +38,7 @@ arm_height   = 80;   // mm
 retainer_bolt_hole_d        = 5;     // mm
 retainer_bolt_z_from_bottom = 65;    // mm - center of hole, from arm bottom
 retainer_boss_od            = 16.5;  // mm - boss OD on the inner side face
-retainer_boss_protrude      = 4;     // mm - how far the boss sticks toward center
+retainer_boss_protrude      = 3.5;     // mm - how far the boss sticks toward center
 
 // Hand screw (locks the retainer bolt; threads in from front-or-back face)
 hand_screw_thread_d  = 3.85;  // mm - measured at thread crests
