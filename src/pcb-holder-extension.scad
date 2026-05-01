@@ -51,7 +51,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 
 extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 27;   // mm - how far the sleeve covers the arm from the top
-wall_thickness   = 2;    // mm
+wall_thickness   = 3;    // mm
 
 // Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
 // the ceiling matches the side walls. Increase to lower the ceiling: the
