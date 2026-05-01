@@ -49,7 +49,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 // 2. EXTENSION PARAMETERS
 //==============================================================================
 
-extension_height = 50;   // mm - rise above arm top (parameter; tune as needed)
+extension_height = 60;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 80;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
@@ -112,7 +112,7 @@ hand_screw_blind_overshoot = 0.5;   // mm past bolt axis (into inside boss mater
 // External top boss is hollowed into a stubby tube so the PCB bracket's
 // round peg can insert into it. Wall thickness is the radial material left
 // between the inlet (ID) and the boss OD.
-top_boss_wall = 1.5;   // mm - radial wall of the boss tube
+top_boss_wall = 2;   // mm - radial wall of the boss tube
 
 // Rounded edges (matches the look of the original arm in the photo):
 // - edge_corner_radius rounds the two -X (PCB-facing) vertical edges, the
