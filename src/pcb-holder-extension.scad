@@ -37,7 +37,7 @@ arm_height   = 80;   // mm
 // Retainer-bolt hole on the arm
 retainer_bolt_hole_d        = 5;     // mm
 retainer_bolt_z_from_bottom = 65;    // mm - center of hole, from arm bottom
-retainer_boss_od            = 16.25;  // mm - boss OD on the inner side face
+retainer_boss_od            = 16.5;  // mm - boss OD on the inner side face
 retainer_boss_protrude      = 4;     // mm - how far the boss sticks toward center
 
 // Hand screw (locks the retainer bolt; threads in from front-or-back face)
@@ -77,7 +77,7 @@ top_bolt_offset_from_top = 12;
 // Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
 // 15.8 mm boss seat fully through the wall. With wall_thickness < boss
 // protrusion, this hole punches all the way through the -X wall.
-boss_recess_clearance = -0.2;   // mm - added to OD for slip fit over boss
+boss_recess_clearance = -0.45;   // mm - added to OD for slip fit over boss
 
 // Inside boss: cylindrical sleeve on the cavity side of the -X wall around
 // the upper bolt hole. Mimics the round wall on the original arm interior —
