@@ -77,7 +77,7 @@ top_bolt_offset_from_top = 12;
 // Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
 // 15.8 mm boss seat fully through the wall. With wall_thickness < boss
 // protrusion, this hole punches all the way through the -X wall.
-boss_recess_clearance = 0.0;   // mm - added to OD for slip fit over boss
+boss_recess_clearance = -0.2;   // mm - added to OD for slip fit over boss
 
 // Inside boss: cylindrical sleeve on the cavity side of the -X wall around
 // the upper bolt hole. Mimics the round wall on the original arm interior —
