@@ -69,7 +69,7 @@ lower_bolt_z_tweak = 2;   // mm
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
 // X axis. Shrinks the outer body width by this amount on the open (+X) side
 // only so the -X wall position is preserved and the +X face moves inward.
-wall_x_trim      = 4;    // mm
+wall_x_trim      = 3.5;    // mm
 
 // Mirrors original arm: top mounting hole this far below extension top
 top_bolt_offset_from_top = 12;
@@ -117,7 +117,7 @@ top_boss_wall = wall_thickness;   // mm - radial wall of the boss tube
 //==============================================================================
 
 surface_tolerance = 0.0;   // mm - per side, sleeve cavity vs arm
-bolt_clearance    = 0.3;   // mm - oversize on bolt through-holes
+bolt_clearance    = 0.35;  // mm - oversize on bolt through-holes
 nut_pocket_depth  = 3;     // mm - hex pocket depth
 eps               = 0.01;  // mm - epsilon to avoid coincident faces
 
