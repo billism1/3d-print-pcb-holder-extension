@@ -124,6 +124,15 @@ top_boss_wall = 2;   // mm - radial wall of the boss tube
 edge_corner_radius = 1.5;   // mm
 top_corner_radius  = 2;     // mm
 
+// Snap-fit lips on the cavity side of the +Y/-Y walls, lower portion of the
+// sleeve only. Wedge-shaped: flush with the cavity face at the -X end of
+// the wedge, protruding into the cavity by snap_fit_lip at the +X end (the
+// open mouth). The +Y/-Y walls flex outward as the arm is pushed past the
+// wedge, gripping the arm via interference.
+snap_fit_lip      = 1;    // mm - inward depth at the lip's +X tip
+snap_fit_x_length = 1.5;      // mm - X length of the wedge ramp
+snap_fit_z_top    = -25;    // mm - top Z of the lip range (extension coords)
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -399,6 +408,50 @@ module top_boss_inlet() {
             cylinder(d = inlet_id, h = retainer_boss_protrude + eps);
 }
 
+// Snap-fit lip wedge on one Y wall (y_sign = +1 for +Y wall, -1 for -Y wall).
+// Triangular wedge in XY: flush with the cavity face at the -X end of the
+// wedge, protruding inward by snap_fit_lip at the +X tip (the open mouth).
+// Hulled between two slabs at z_bot_lip and z_top_lip so it follows the
+// cavity Y taper across its Z range.
+module snap_fit_lip_wedge(y_sign) {
+    z_bot_lip  = -sleeve_depth;
+    z_top_lip  = snap_fit_z_top;
+    z_frac_top = (z_top_lip + sleeve_depth) / sleeve_depth;
+
+    cavity_y_at_top = cavity_y_bot + (cavity_y_top - cavity_y_bot) * z_frac_top;
+    sleeve_x_at_top = sleeve_x_bot + (sleeve_x_top - sleeve_x_bot) * z_frac_top;
+
+    x_max_top = sleeve_x_at_top / 2 - wall_x_trim;
+    x_max_bot = sleeve_x_bot     / 2 - wall_x_trim;
+
+    cy_face_top = y_sign * cavity_y_at_top / 2;
+    cy_face_bot = y_sign * cavity_y_bot    / 2;
+
+    lip_in_top = cy_face_top - y_sign * snap_fit_lip;
+    lip_in_bot = cy_face_bot - y_sign * snap_fit_lip;
+
+    x_min_top = x_max_top - snap_fit_x_length;
+    x_min_bot = x_max_bot - snap_fit_x_length;
+
+    // Triangle vertex order chosen so the polygon is CCW for either y_sign,
+    // so linear_extrude treats it as a solid (not a hole).
+    triangle_bot = (y_sign > 0)
+        ? [[x_min_bot, cy_face_bot], [x_max_bot, lip_in_bot], [x_max_bot, cy_face_bot]]
+        : [[x_min_bot, cy_face_bot], [x_max_bot, cy_face_bot], [x_max_bot, lip_in_bot]];
+    triangle_top = (y_sign > 0)
+        ? [[x_min_top, cy_face_top], [x_max_top, lip_in_top], [x_max_top, cy_face_top]]
+        : [[x_min_top, cy_face_top], [x_max_top, cy_face_top], [x_max_top, lip_in_top]];
+
+    hull() {
+        translate([0, 0, z_bot_lip])
+            linear_extrude(height = eps)
+                polygon(triangle_bot);
+        translate([0, 0, z_top_lip])
+            linear_extrude(height = eps)
+                polygon(triangle_top);
+    }
+}
+
 //==============================================================================
 // 8. SUBTRACTIONS (holes + nut pockets)
 //==============================================================================
@@ -484,6 +537,8 @@ module extension_piece() {
             top_boss();
             inside_cyl_boss();
             nut_holder();
+            snap_fit_lip_wedge(+1);
+            snap_fit_lip_wedge(-1);
         }
         lower_mount_subtractions();
         upper_bolt_hole();
