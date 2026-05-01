@@ -72,7 +72,7 @@ lower_bolt_z_tweak = 2;   // mm
 wall_x_trim      = 4;    // mm
 
 // Mirrors original arm: top mounting hole this far below extension top
-top_bolt_offset_from_top = 10;
+top_bolt_offset_from_top = 12;
 
 // Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
 // 15.8 mm boss seat fully through the wall. With wall_thickness < boss
