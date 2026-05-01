@@ -116,7 +116,7 @@ top_boss_wall = wall_thickness;   // mm - radial wall of the boss tube
 // 3. TOLERANCES
 //==============================================================================
 
-surface_tolerance = 0.2;   // mm - per side, sleeve cavity vs arm
+surface_tolerance = 0.0;   // mm - per side, sleeve cavity vs arm
 bolt_clearance    = 0.3;   // mm - oversize on bolt through-holes
 nut_pocket_depth  = 3;     // mm - hex pocket depth
 eps               = 0.01;  // mm - epsilon to avoid coincident faces
