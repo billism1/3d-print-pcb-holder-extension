@@ -64,7 +64,7 @@ sleeve_ceiling_thickness = wall_thickness;   // mm
 // position derived from where the arm seats. Positive moves the hole up
 // (less negative Z), negative moves it down. Use to fine-tune alignment
 // with the actual arm if measurements drift.
-lower_bolt_z_tweak = 4;   // mm
+lower_bolt_z_tweak = 3;   // mm
 
 raise_base_ext_sep_wall = 2;
 
