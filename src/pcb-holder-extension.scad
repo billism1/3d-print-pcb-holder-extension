@@ -49,8 +49,8 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 // 2. EXTENSION PARAMETERS
 //==============================================================================
 
-extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
-sleeve_depth     = 27;   // mm - how far the sleeve covers the arm from the top
+extension_height = 50;   // mm - rise above arm top (parameter; tune as needed)
+sleeve_depth     = 80;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
 // Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
@@ -64,9 +64,9 @@ sleeve_ceiling_thickness = wall_thickness;   // mm
 // position derived from where the arm seats. Positive moves the hole up
 // (less negative Z), negative moves it down. Use to fine-tune alignment
 // with the actual arm if measurements drift.
-lower_bolt_z_tweak = 3;   // mm
+lower_bolt_z_tweak = 3.5;   // mm
 
-raise_base_ext_sep_wall = 2;
+raise_base_ext_sep_wall = 2.5;
 
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
 // X axis. Shrinks the outer body width by this amount on the open (+X) side
@@ -137,7 +137,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 164;
+$fn = 64;
 $fa = 0.5;
 $fs = 0.1;
 
