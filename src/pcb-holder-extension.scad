@@ -28,7 +28,7 @@
 render_mirrored_piece = false;
 
 // Arm cross-section (tapers linearly bottom -> top over arm_height)
-arm_x_bottom = 24;   // mm - "front view" width  (left-right, retainer bolt axis)
+arm_x_bottom = 23.5;   // mm - "front view" width  (left-right, retainer bolt axis)
 arm_x_top    = 16;
 arm_y_bottom = 30;   // mm - "side view" width   (front-to-back, hand screw axis)
 arm_y_top    = 20;
@@ -50,7 +50,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 //==============================================================================
 
 extension_height = 60;   // mm - rise above arm top (parameter; tune as needed)
-sleeve_depth     = 80;   // mm - how far the sleeve covers the arm from the top
+sleeve_depth     = 84;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
 // Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
@@ -152,7 +152,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 64;
+$fn = 164;
 $fa = 0.5;
 $fs = 0.1;
 
