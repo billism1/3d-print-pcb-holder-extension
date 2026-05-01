@@ -37,7 +37,7 @@ arm_height   = 80;   // mm
 // Retainer-bolt hole on the arm
 retainer_bolt_hole_d        = 5;     // mm
 retainer_bolt_z_from_bottom = 65;    // mm - center of hole, from arm bottom
-retainer_boss_od            = 15.8;  // mm - boss OD on the inner side face
+retainer_boss_od            = 16.25;  // mm - boss OD on the inner side face
 retainer_boss_protrude      = 4;     // mm - how far the boss sticks toward center
 
 // Hand screw (locks the retainer bolt; threads in from front-or-back face)
@@ -50,7 +50,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 //==============================================================================
 
 extension_height = 40;   // mm - rise above arm top (parameter; tune as needed)
-sleeve_depth     = 35;   // mm - how far the sleeve covers the arm from the top
+sleeve_depth     = 27;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 2;    // mm
 
 // Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
@@ -64,7 +64,7 @@ sleeve_ceiling_thickness = wall_thickness;   // mm
 // position derived from where the arm seats. Positive moves the hole up
 // (less negative Z), negative moves it down. Use to fine-tune alignment
 // with the actual arm if measurements drift.
-lower_bolt_z_tweak = 0;   // mm
+lower_bolt_z_tweak = 2;   // mm
 
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
 // X axis. Shrinks the outer body width by this amount on the open (+X) side
@@ -77,7 +77,7 @@ top_bolt_offset_from_top = 10;
 // Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
 // 15.8 mm boss seat fully through the wall. With wall_thickness < boss
 // protrusion, this hole punches all the way through the -X wall.
-boss_recess_clearance = 0.4;   // mm - added to OD for slip fit over boss
+boss_recess_clearance = 0.0;   // mm - added to OD for slip fit over boss
 
 // Inside boss: cylindrical sleeve on the cavity side of the -X wall around
 // the upper bolt hole. Mimics the round wall on the original arm interior —
