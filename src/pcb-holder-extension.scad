@@ -114,6 +114,16 @@ hand_screw_blind_overshoot = 0.5;   // mm past bolt axis (into inside boss mater
 // between the inlet (ID) and the boss OD.
 top_boss_wall = 2;   // mm - radial wall of the boss tube
 
+// Rounded edges (matches the look of the original arm in the photo):
+// - edge_corner_radius rounds the two -X (PCB-facing) vertical edges, the
+//   ones running the full sleeve+upper-body height.
+// - top_corner_radius adds a chamfer at the very top of the upper body.
+// edge_corner_radius must stay smaller than wall_thickness * sqrt(2)/(1+sqrt(2))
+// (~1.76 mm at wall_thickness = 3 mm) or the rounded corner cuts past the
+// inner cavity wall.
+edge_corner_radius = 1.5;   // mm
+top_corner_radius  = 2;     // mm
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -218,6 +228,64 @@ module tapered_box(x_bot, y_bot, x_top, y_top, z_bot, z_top) {
     }
 }
 
+// Slab of thickness eps with rounded -X corners and sharp +X corners.
+// Used as a layer in hull() to build a tapered body whose -X (PCB-facing)
+// vertical edges are rounded. The +X side is left sharp because that face
+// is open in the C-channel anyway.
+module rounded_slab_2d(x, y, r) {
+    union() {
+        // Main rectangle from -x/2+r to +x/2 in X, full y in Y
+        translate([-x/2 + r, -y/2, 0])
+            cube([x - r, y, eps]);
+        // -X strip between the two rounded corners
+        translate([-x/2, -y/2 + r, 0])
+            cube([r, y - 2 * r, eps]);
+        // Two rounded corners
+        translate([-x/2 + r, -y/2 + r, 0])
+            cylinder(r = r, h = eps);
+        translate([-x/2 + r, +y/2 - r, 0])
+            cylinder(r = r, h = eps);
+    }
+}
+
+// Tapered body with rounded -X vertical edges and an optional chamfered top.
+// r_corner: vertical-edge radius. r_top: top chamfer radius (0 = sharp top).
+module rounded_tapered_body(x_bot, y_bot, x_top, y_top, z_bot, z_top,
+                            r_corner, r_top = 0) {
+    if (r_top > 0) {
+        z_chamfer    = z_top - r_top;
+        z_frac       = (z_chamfer - z_bot) / (z_top - z_bot);
+        x_at_chamfer = x_bot + (x_top - x_bot) * z_frac;
+        y_at_chamfer = y_bot + (y_top - y_bot) * z_frac;
+        union() {
+            // Main body up to where the top chamfer starts
+            hull() {
+                translate([0, 0, z_bot])
+                    rounded_slab_2d(x_bot, y_bot, r_corner);
+                translate([0, 0, z_chamfer])
+                    rounded_slab_2d(x_at_chamfer, y_at_chamfer, r_corner);
+            }
+            // Chamfered top cap
+            hull() {
+                translate([0, 0, z_chamfer])
+                    rounded_slab_2d(x_at_chamfer, y_at_chamfer, r_corner);
+                translate([0, 0, z_top])
+                    rounded_slab_2d(
+                        max(x_at_chamfer - 2 * r_top, 2 * eps),
+                        max(y_at_chamfer - 2 * r_top, 2 * eps),
+                        max(r_corner - r_top, eps));
+            }
+        }
+    } else {
+        hull() {
+            translate([0, 0, z_bot])
+                rounded_slab_2d(x_bot, y_bot, r_corner);
+            translate([0, 0, z_top])
+                rounded_slab_2d(x_top, y_top, r_corner);
+        }
+    }
+}
+
 // Hex pocket along +Z, sized across-flats. cylinder($fn=6) is across-vertices,
 // so scale by 1/cos(30) to get the desired across-flats dimension.
 module hex_pocket(af, depth) {
@@ -237,11 +305,12 @@ module sleeve_shell() {
     difference() {
         // Outer trimmed by wall_x_trim on the +X side (the open side).
         // Width is reduced and the body shifted -X by half the trim, keeping
-        // the -X wall position unchanged.
+        // the -X wall position unchanged. -X vertical edges are rounded.
         translate([-wall_x_trim / 2, 0, 0])
-            tapered_box(sleeve_x_bot - wall_x_trim, sleeve_y_bot,
-                        sleeve_x_top - wall_x_trim, sleeve_y_top,
-                        -sleeve_depth, 0);
+            rounded_tapered_body(sleeve_x_bot - wall_x_trim, sleeve_y_bot,
+                                 sleeve_x_top - wall_x_trim, sleeve_y_top,
+                                 -sleeve_depth, 0,
+                                 edge_corner_radius);
         // Cavity, shifted +X by wall_thickness so it punches the +X wall
         // entirely while leaving the -X wall intact at full thickness.
         // Cavity stops wall_thickness below the top of the sleeve so the
@@ -262,10 +331,12 @@ module upper_body() {
     difference() {
         // Outer trimmed by wall_x_trim on the +X side (the open side).
         // Same trim+shift pattern as sleeve_shell, preserving -X wall position.
+        // -X vertical edges rounded; top edges chamfered.
         translate([-wall_x_trim / 2, 0, 0])
-            tapered_box(upper_outer_x_base - wall_x_trim, upper_outer_y_base,
-                        upper_outer_x_topz - wall_x_trim, upper_outer_y_topz,
-                        0, extension_height);
+            rounded_tapered_body(upper_outer_x_base - wall_x_trim, upper_outer_y_base,
+                                 upper_outer_x_topz - wall_x_trim, upper_outer_y_topz,
+                                 0, extension_height,
+                                 edge_corner_radius, top_corner_radius);
         // Cavity, open on +X, sealed at the top by wall_thickness.
         translate([wall_thickness, 0, 0])
             tapered_box(upper_x_base + 2 * wall_thickness, upper_y_base,
