@@ -133,6 +133,12 @@ snap_fit_lip      = 1;    // mm - inward depth at the lip's +X tip
 snap_fit_x_length = 1.5;      // mm - X length of the wedge ramp
 snap_fit_z_top    = -25;    // mm - top Z of the lip range (extension coords)
 
+// Wall X extension: where the snap-fit grips are, the +Y and -Y walls
+// extend further in the +X direction by this amount, making the walls
+// "longer" along X in the snap-fit region. The snap-fit lip wedge follows
+// to the new leading edge so the lip is at the extended wall's tip.
+snap_fit_wall_x_extend = 1;    // mm - extra X length of the walls in the snap-fit region
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -408,6 +414,54 @@ module top_boss_inlet() {
             cylinder(d = inlet_id, h = retainer_boss_protrude + eps);
 }
 
+// Wall +X extension on one Y wall: in the snap-fit Z range, adds wall
+// material from the regular wall +X edge outward (+X) by snap_fit_wall_x_extend.
+// Material is at full wall thickness (between cavity_y face and outer_y face).
+module snap_fit_wall_extension(y_sign) {
+    z_bot       = -sleeve_depth;
+    z_top       = snap_fit_z_top;
+    z_frac_top  = (z_top + sleeve_depth) / sleeve_depth;
+
+    sleeve_x_at_top = sleeve_x_bot + (sleeve_x_top - sleeve_x_bot) * z_frac_top;
+    sleeve_y_at_top = sleeve_y_bot + (sleeve_y_top - sleeve_y_bot) * z_frac_top;
+    cavity_y_at_top = cavity_y_bot + (cavity_y_top - cavity_y_bot) * z_frac_top;
+
+    // Regular wall +X edge (without extension)
+    x_reg_top = sleeve_x_at_top / 2 - wall_x_trim;
+    x_reg_bot = sleeve_x_bot     / 2 - wall_x_trim;
+    // Extended wall +X edge
+    x_ext_top = x_reg_top + snap_fit_wall_x_extend;
+    x_ext_bot = x_reg_bot + snap_fit_wall_x_extend;
+
+    // Wall material spans the cavity face to the outer face
+    cy_face_top = y_sign * cavity_y_at_top / 2;
+    cy_face_bot = y_sign * cavity_y_bot    / 2;
+    oy_face_top = y_sign * sleeve_y_at_top / 2;
+    oy_face_bot = y_sign * sleeve_y_bot    / 2;
+
+    // Rectangle in XY: from x_reg to x_ext in X, from cavity_y to outer_y in Y.
+    // Vertex order chosen so the polygon is CCW for either y_sign.
+    poly_bot = (y_sign > 0)
+        ? [[x_reg_bot, cy_face_bot], [x_ext_bot, cy_face_bot],
+           [x_ext_bot, oy_face_bot], [x_reg_bot, oy_face_bot]]
+        : [[x_reg_bot, cy_face_bot], [x_reg_bot, oy_face_bot],
+           [x_ext_bot, oy_face_bot], [x_ext_bot, cy_face_bot]];
+    poly_top = (y_sign > 0)
+        ? [[x_reg_top, cy_face_top], [x_ext_top, cy_face_top],
+           [x_ext_top, oy_face_top], [x_reg_top, oy_face_top]]
+        : [[x_reg_top, cy_face_top], [x_reg_top, oy_face_top],
+           [x_ext_top, oy_face_top], [x_ext_top, cy_face_top]];
+
+    hull() {
+        translate([0, 0, z_bot])
+            linear_extrude(height = eps)
+                polygon(poly_bot);
+        translate([0, 0, z_top])
+            linear_extrude(height = eps)
+                polygon(poly_top);
+    }
+}
+
 // Snap-fit lip wedge on one Y wall (y_sign = +1 for +Y wall, -1 for -Y wall).
 // Triangular wedge in XY: flush with the cavity face at the -X end of the
 // wedge, protruding inward by snap_fit_lip at the +X tip (the open mouth).
@@ -421,8 +475,10 @@ module snap_fit_lip_wedge(y_sign) {
     cavity_y_at_top = cavity_y_bot + (cavity_y_top - cavity_y_bot) * z_frac_top;
     sleeve_x_at_top = sleeve_x_bot + (sleeve_x_top - sleeve_x_bot) * z_frac_top;
 
-    x_max_top = sleeve_x_at_top / 2 - wall_x_trim;
-    x_max_bot = sleeve_x_bot     / 2 - wall_x_trim;
+    // +X tip uses the EXTENDED wall edge so the lip ends at the new leading
+    // edge of the wall (matching snap_fit_wall_extension).
+    x_max_top = sleeve_x_at_top / 2 - wall_x_trim + snap_fit_wall_x_extend;
+    x_max_bot = sleeve_x_bot     / 2 - wall_x_trim + snap_fit_wall_x_extend;
 
     cy_face_top = y_sign * cavity_y_at_top / 2;
     cy_face_bot = y_sign * cavity_y_bot    / 2;
@@ -539,6 +595,8 @@ module extension_piece() {
             nut_holder();
             snap_fit_lip_wedge(+1);
             snap_fit_lip_wedge(-1);
+            snap_fit_wall_extension(+1);
+            snap_fit_wall_extension(-1);
         }
         lower_mount_subtractions();
         upper_bolt_hole();
