@@ -492,6 +492,46 @@ module top_boss() {
             cylinder(d = retainer_boss_od, h = retainer_boss_protrude);
 }
 
+// Top boss with self-supporting taper. Hull adds a 45° wedge below the
+// boss anchored to the body -X wall at a lower Z so the boss's underside
+// prints without support material.
+module top_boss_supported() {
+    z_anchor = upper_bolt_z - retainer_boss_od / 2 - retainer_boss_protrude;
+    hull() {
+        top_boss();
+        // Y-aligned anchor strip at the body wall, lower Z. Y extent
+        // matches the boss so the wedge is symmetric in Y.
+        translate([top_boss_x_face, -retainer_boss_od / 2, z_anchor])
+            cube([eps, retainer_boss_od, eps]);
+    }
+}
+
+// Inside cluster (cyl boss + nut holder) with self-supporting taper. Hull
+// blends both pieces into a single body and pulls them down at 45° to a
+// shared anchor on the cavity -X wall. Replaces the bare cyl_boss + nut_holder
+// hull in long_arm() so both pieces print without support.
+module inside_cluster_supported() {
+    cavity_x_face = -cavity_x_at_ub / 2;
+    cavity_y_face = -cavity_y_at_ub / 2;
+
+    cluster_bottom_z = upper_bolt_z - max(inside_boss_od / 2, nut_holder_z / 2);
+    z_drop           = max(inside_boss_length, nut_holder_x);
+    z_anchor         = cluster_bottom_z - z_drop;
+
+    y_min  = cavity_y_face;
+    y_max  = inside_boss_od / 2;
+    y_size = y_max - y_min;
+
+    hull() {
+        inside_cyl_boss();
+        nut_holder();
+        // Y-aligned anchor strip at the cavity wall, lower Z. Spans the
+        // combined Y extent of cyl boss + nut holder.
+        translate([cavity_x_face, y_min, z_anchor])
+            cube([eps, y_size, eps]);
+    }
+}
+
 // Top boss inlet: hollows the external boss into a tube (stubby pipe) so
 // the PCB bracket's round peg can insert into it. Cuts a cylindrical pocket
 // through the full boss protrusion, stopping at top_boss_x_face (the boss's
@@ -759,16 +799,13 @@ module long_arm() {
         union() {
             lower_body();
             upper_body();
-            top_boss();
-            // Hull blends the rectangular nut holder block into the
-            // cylindrical inside boss so the exterior transitions smoothly
-            // (no sharp 90° corner between block and cylinder). The
-            // interior nut nook and bolt hole are still subtracted below,
-            // so the rectangular nut pocket is preserved.
-            hull() {
-                inside_cyl_boss();
-                nut_holder();
-            }
+            top_boss_supported();
+            // Inside cluster (cyl boss + nut holder) with self-supporting
+            // taper. Hull blends the boss into the rectangular block and
+            // tapers both down to the cavity wall at 45° so they print
+            // without support. Interior nut nook and bolt hole are still
+            // subtracted below, so the nut pocket is preserved.
+            inside_cluster_supported();
             rail_base();
             screw_plates();
             side_nut_holder();
