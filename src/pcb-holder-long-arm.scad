@@ -126,8 +126,8 @@ use_rounded_top = false;
 // along the X axis. The fixed rail slides through the hole; the entire arm
 // translates along the rail in X. The rail runs parallel to the retainer
 // bolt axis. Wall thickness around the rail matches `wall_thickness`.
-rail_y         = 29;     // mm - rail cross-section width  (Y axis)
-rail_z         = 14;     // mm - rail cross-section height (Z axis)
+rail_y         = 30;     // mm - rail cross-section width  (Y axis)
+rail_z         = 15;     // mm - rail cross-section height (Z axis)
 rail_clearance = 0.3;    // mm - per-side slip-fit clearance around the rail
 rail_base_x    = 40;     // mm - X length of the rail base (grip along the rail)
 rail_base_corner_r = 1.75;  // mm - radius on the 4 outer corners (viewed along X)
