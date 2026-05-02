@@ -163,6 +163,26 @@ screw_plate_screw_d = 4;       // mm - mounting screw diameter
 // along the rail. Reuses the same nut and screw size as the upper hand-screw.
 side_nut_holder_x_size = screw_plate_x / 2;   // mm - X width (matches the empty area span)
 
+// Plastic pin between the rail-locking hand-screw and the rail. The screw
+// pushes the pin head; the pin shaft passes through the rail base outer
+// wall and presses on the rail. Assembly: drop the pin in through the
+// outer hole of the side nut holder so its head sits in a pocket cut into
+// the rail base wall, then load the captive nut, then thread in the screw.
+// All clearances are added directly to their named dimension (e.g.,
+// pocket diameter = pin_head_d + pin_head_d_clearance).
+pin_shaft_d              = 3;     // mm - pin shaft diameter
+pin_shaft_d_clearance    = 0.2;   // mm - shaft hole diameter clearance
+pin_head_d               = 3.6;   // mm - pin head diameter
+pin_head_d_clearance     = 0.4;   // mm - head pocket diameter clearance
+pin_head_thick           = 2.1;   // mm - pin head thickness (along screw axis)
+pin_head_thick_clearance = 0.3;   // mm - head pocket axial clearance
+
+// Outer hole on the side nut holder's outer Y face. Sized so the pin head
+// (3.6 mm) drops through during assembly; the same bore carries the screw
+// threads (4 mm) when the screw is later installed.
+side_screw_outer_hole_d           = 4;     // mm - nominal outer-hole diameter
+side_screw_outer_hole_d_clearance = 0.2;   // mm - outer-hole diameter clearance
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -266,6 +286,22 @@ side_nut_holder_y_center = side_nut_holder_y_inner
 side_nut_holder_y_outer  = side_nut_holder_y_inner
                            + screw_plate_half_y_dir * side_nut_holder_y_size;
 side_nut_holder_z_center = rail_base_center_z;
+
+// Side nut holder pin-bore stages along the screw Y axis:
+//   1) Outer hole: full-bore through both block walls and the nut nook —
+//      lets the pin head drop in during assembly and clears the screw.
+//   2) Pocket: cut into the rail base outer wall, captures the pin head;
+//      the wall material left between the pocket back and the cavity acts
+//      as a shoulder that catches the pin head's flange.
+//   3) Shaft hole: continues from the pocket back through the rest of the
+//      rail base wall and into the cavity so the pin shaft can press the
+//      rail.
+side_pin_outer_hole_d  = side_screw_outer_hole_d + side_screw_outer_hole_d_clearance;
+side_pin_pocket_d      = pin_head_d  + pin_head_d_clearance;
+side_pin_pocket_y      = pin_head_thick + pin_head_thick_clearance;
+side_pin_shaft_hole_d  = pin_shaft_d + pin_shaft_d_clearance;
+side_pin_pocket_back_y = side_nut_holder_y_inner
+                         - screw_plate_half_y_dir * side_pin_pocket_y;
 
 //==============================================================================
 // 6. HELPER MODULES
@@ -657,20 +693,42 @@ module side_nut_nook_subtraction() {
         cube([slot_x_size, ny, nz], center = true);
 }
 
-// Rail-locking screw hole: cylinder along Y, from the outer Y face of the
-// side nut holder, through the captive nut, through the rail base outer Y
-// wall, and into the rail cavity (stops past the rail base center so it
-// fully pierces the wall). The screw tip presses on the rail's outer Y face
-// to lock the arm in place.
+// Rail-locking pin bore: 3-stage hole along Y from the outer Y face of the
+// side nut holder into the rail cavity. The screw threads engage with the
+// captive nut and presses on the plastic pin head; the pin head sits in a
+// pocket cut into the rail base outer wall; the pin shaft passes through
+// the rest of the wall into the cavity to press on the rail.
 module side_screw_subtraction() {
-    end_y_inside = -screw_plate_half_y_dir * eps;
-    L = abs(side_nut_holder_y_outer - end_y_inside) + eps;
-
+    // Stage 1 — Outer hole: full-bore through both block walls and the nut
+    // nook. Sized so the pin head drops through during assembly; the same
+    // bore clears the screw threads when the screw is later installed.
+    L_outer = side_nut_holder_y_size + 2 * eps;
     translate([side_nut_holder_x_center,
                side_nut_holder_y_outer + screw_plate_half_y_dir * eps,
                side_nut_holder_z_center])
         rotate([screw_plate_half_y_dir * 90, 0, 0])
-            cylinder(d = hand_screw_thread_d + bolt_clearance, h = L);
+            cylinder(d = side_pin_outer_hole_d, h = L_outer);
+
+    // Stage 2 — Pin head pocket: cut into the rail base outer wall starting
+    // at the rail base outer Y face. Captures the pin head; the remaining
+    // wall material between the pocket back and the cavity acts as a
+    // shoulder that catches the pin head's flange.
+    L_pocket = side_pin_pocket_y + 2 * eps;
+    translate([side_nut_holder_x_center,
+               side_nut_holder_y_inner + screw_plate_half_y_dir * eps,
+               side_nut_holder_z_center])
+        rotate([screw_plate_half_y_dir * 90, 0, 0])
+            cylinder(d = side_pin_pocket_d, h = L_pocket);
+
+    // Stage 3 — Pin shaft hole: continues from the pocket back through the
+    // rest of the rail base wall and into the cavity, so the pin shaft tip
+    // can press on the rail.
+    L_shaft = abs(side_pin_pocket_back_y) + 2 * eps;
+    translate([side_nut_holder_x_center,
+               side_pin_pocket_back_y + screw_plate_half_y_dir * eps,
+               side_nut_holder_z_center])
+        rotate([screw_plate_half_y_dir * 90, 0, 0])
+            cylinder(d = side_pin_shaft_hole_d, h = L_shaft);
 }
 
 //==============================================================================
