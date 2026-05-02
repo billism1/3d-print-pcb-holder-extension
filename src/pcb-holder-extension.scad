@@ -49,7 +49,7 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 // 2. EXTENSION PARAMETERS
 //==============================================================================
 
-extension_height = 60;   // mm - rise above arm top (parameter; tune as needed)
+extension_height = 80;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 84;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
@@ -158,7 +158,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 180;
+$fn = 64;
 $fa = 0.5;
 $fs = 0.1;
 
@@ -551,13 +551,19 @@ module lower_mount_subtractions() {
                      center = true);
 }
 
-// Upper bolt hole: through the upper body and the boss, axis = X.
+// Upper bolt hole: through the top boss, the upper body, AND the inside
+// cylindrical boss on the cavity side. The inside boss's +X tip can reach
+// further out than the body's +X face once the upper body has tapered narrow
+// (large extension_height), so the far end is taken as the max of the two.
 module upper_bolt_hole() {
     z_frac = upper_bolt_z / extension_height;
     x_outer_half =
         (upper_outer_x_base + (upper_outer_x_topz - upper_outer_x_base) * z_frac) / 2;
-    L = 2 * x_outer_half + retainer_boss_protrude + 2 * eps;
-    translate([-x_outer_half - retainer_boss_protrude - eps, 0, upper_bolt_z])
+    inside_boss_tip_x = -cavity_x_at_ub / 2 + inside_boss_length;
+    start_x = -x_outer_half - retainer_boss_protrude - eps;
+    end_x   = max(x_outer_half, inside_boss_tip_x) + eps;
+    L = end_x - start_x;
+    translate([start_x, 0, upper_bolt_z])
         rotate([0, 90, 0])
             cylinder(d = retainer_bolt_hole_d + bolt_clearance, h = L);
 }
