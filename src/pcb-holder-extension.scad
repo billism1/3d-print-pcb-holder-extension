@@ -591,8 +591,15 @@ module extension_piece() {
             sleeve_shell();
             upper_body();
             top_boss();
-            inside_cyl_boss();
-            nut_holder();
+            // Hull blends the rectangular nut holder block into the
+            // cylindrical inside boss so the exterior transitions smoothly
+            // (no sharp 90° corner between block and cylinder). The
+            // interior nut nook and bolt hole are still subtracted below,
+            // so the rectangular nut pocket is preserved.
+            hull() {
+                inside_cyl_boss();
+                nut_holder();
+            }
             snap_fit_lip_wedge(+1);
             snap_fit_lip_wedge(-1);
             snap_fit_wall_extension(+1);
