@@ -30,7 +30,7 @@ render_mirrored_piece = false;
 // Arm cross-section (tapers linearly bottom -> top over arm_height)
 arm_x_bottom = 23.5;   // mm - "front view" width  (left-right, retainer bolt axis)
 arm_x_top    = 16;
-arm_y_bottom = 28.5;   // mm - "side view" width   (front-to-back, hand screw axis)
+arm_y_bottom = 25;   // mm - "side view" width   (front-to-back, hand screw axis)
 arm_y_top    = 20;
 arm_height   = 80;   // mm
 
