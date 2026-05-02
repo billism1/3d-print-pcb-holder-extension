@@ -155,6 +155,14 @@ screw_plate_half_x_keep = +1;  // -1: keep -X edge; +1: keep +X edge
 // diagonal across the rail base).
 screw_plate_screw_d = 2.5;       // mm - mounting screw diameter
 
+// Side nut holder: a block on the outer Y face of the rail base (on the same
+// Y side as the half-width screw plate), centered above the half-width
+// plate's missing half. Captures a hand-screw nut for the rail-locking screw.
+// The screw enters from the outer Y face, passes through the nut and the
+// rail base wall, and presses against the rail to lock the arm in place
+// along the rail. Reuses the same nut and screw size as the upper hand-screw.
+side_nut_holder_x_size = screw_plate_x / 2;   // mm - X width (matches the empty area span)
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -233,6 +241,22 @@ rail_base_outer_z = rail_cavity_z + 2 * wall_thickness;
 rail_base_top_z    = -lower_height;
 rail_base_bot_z    = rail_base_top_z - rail_base_outer_z;
 rail_base_center_z = (rail_base_top_z + rail_base_bot_z) / 2;
+
+// Side nut holder derived dimensions. The block sits on the outer Y face of
+// the rail base (on the half-width plate's Y side), centered in X on the
+// missing-half empty area, and centered in Z on the rail (so the screw axis
+// runs through the rail).
+side_nut_holder_y_size   = hand_screw_nut_thick + 2 * nut_nook_y_clear
+                           + 2 * nut_holder_wall_thickness;
+side_nut_holder_z_size   = nut_holder_z;
+side_nut_holder_x_center = -wall_x_trim / 2
+                           - screw_plate_half_x_keep * screw_plate_x / 4;
+side_nut_holder_y_inner  = screw_plate_half_y_dir * rail_base_outer_y / 2;
+side_nut_holder_y_center = side_nut_holder_y_inner
+                           + screw_plate_half_y_dir * side_nut_holder_y_size / 2;
+side_nut_holder_y_outer  = side_nut_holder_y_inner
+                           + screw_plate_half_y_dir * side_nut_holder_y_size;
+side_nut_holder_z_center = rail_base_center_z;
 
 //==============================================================================
 // 6. HELPER MODULES
@@ -495,6 +519,19 @@ module screw_plates() {
     }
 }
 
+// Side nut holder block: rectangular block on the outer Y face of the rail
+// base (on the half-width plate's Y side), centered above the missing-half
+// of the screw plate. Sized in Z to match the upper nut holder; centered on
+// the rail in Z so the screw axis runs through the rail.
+module side_nut_holder() {
+    translate([side_nut_holder_x_center,
+               side_nut_holder_y_center,
+               side_nut_holder_z_center])
+        cube([side_nut_holder_x_size,
+              side_nut_holder_y_size,
+              side_nut_holder_z_size], center = true);
+}
+
 //==============================================================================
 // 8. SUBTRACTIONS (holes + nut pockets)
 //==============================================================================
@@ -577,6 +614,44 @@ module screw_plate_holes() {
         cylinder(d = hole_d, h = h);
 }
 
+// Side nut nook: rectangular slot inside the side nut holder block, holding
+// the rail-locking hand-screw nut. Open on +X (extends well past the +X face
+// of the block so the nut is loaded from outside in -X direction). Floor and
+// ceiling within the block capture the nut vertically; the slot's outer-Y
+// end backs up the nut axially when the screw is tightened.
+module side_nut_nook_subtraction() {
+    nut_av = hand_screw_nut_af / cos(30);
+    nx = nut_av                + 2 * nut_nook_x_clear;   // X: hex AV + clearance
+    ny = hand_screw_nut_thick  + 2 * nut_nook_y_clear;   // Y: nut thickness + clearance
+    nz = hand_screw_nut_af     + 2 * nut_nook_z_clear;   // Z: hex AF + clearance
+
+    // Slot extends from -nx/2 (deepest into block) to well past the +X face
+    // of the block (open for nut loading from +X).
+    slot_x_min    = side_nut_holder_x_center - nx / 2;
+    slot_x_far    = side_nut_holder_x_center + side_nut_holder_x_size / 2 + 20;
+    slot_x_size   = slot_x_far - slot_x_min;
+    slot_x_center = (slot_x_min + slot_x_far) / 2;
+
+    translate([slot_x_center, side_nut_holder_y_center, side_nut_holder_z_center])
+        cube([slot_x_size, ny, nz], center = true);
+}
+
+// Rail-locking screw hole: cylinder along Y, from the outer Y face of the
+// side nut holder, through the captive nut, through the rail base outer Y
+// wall, and into the rail cavity (stops past the rail base center so it
+// fully pierces the wall). The screw tip presses on the rail's outer Y face
+// to lock the arm in place.
+module side_screw_subtraction() {
+    end_y_inside = -screw_plate_half_y_dir * eps;
+    L = abs(side_nut_holder_y_outer - end_y_inside) + eps;
+
+    translate([side_nut_holder_x_center,
+               side_nut_holder_y_outer + screw_plate_half_y_dir * eps,
+               side_nut_holder_z_center])
+        rotate([screw_plate_half_y_dir * 90, 0, 0])
+            cylinder(d = hand_screw_thread_d + bolt_clearance, h = L);
+}
+
 //==============================================================================
 // 9. TOP-LEVEL LONG ARM PIECE
 //==============================================================================
@@ -600,12 +675,15 @@ module long_arm() {
             }
             rail_base();
             screw_plates();
+            side_nut_holder();
         }
         upper_bolt_hole();
         top_boss_inlet();
         hand_screw_subtractions();
         nut_nook_subtraction();
         screw_plate_holes();
+        side_nut_nook_subtraction();
+        side_screw_subtraction();
     }
 }
 
