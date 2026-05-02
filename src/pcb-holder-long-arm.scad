@@ -174,7 +174,7 @@ pin_shaft_d              = 3;     // mm - pin shaft diameter
 pin_shaft_d_clearance    = 0.2;   // mm - shaft hole diameter clearance
 pin_head_d               = 4.5;   // mm - pin head diameter
 pin_head_d_clearance     = 0.4;   // mm - head pocket diameter clearance
-pin_head_thick           = 2.1;   // mm - pin head thickness (along screw axis)
+pin_head_thick           = 2.0;   // mm - pin head thickness (along screw axis)
 pin_head_thick_clearance = 0.3;   // mm - head pocket axial clearance
 
 // Outer hole on the side nut holder's outer Y face. Sized so the pin head
