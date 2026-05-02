@@ -130,7 +130,7 @@ rail_y         = 29;     // mm - rail cross-section width  (Y axis)
 rail_z         = 14;     // mm - rail cross-section height (Z axis)
 rail_clearance = 0.3;    // mm - per-side slip-fit clearance around the rail
 rail_base_x    = 40;     // mm - X length of the rail base (grip along the rail)
-rail_base_corner_r = 2;  // mm - radius on the 4 outer corners (viewed along X)
+rail_base_corner_r = 1.75;  // mm - radius on the 4 outer corners (viewed along X)
 
 // Screw plate mount: flat flange tabs on the bottom of the rail base sticking
 // out in +Y and -Y, for screwing the holder down to a platform. Plate bottoms
@@ -522,14 +522,26 @@ module screw_plates() {
 // Side nut holder block: rectangular block on the outer Y face of the rail
 // base (on the half-width plate's Y side), centered above the missing-half
 // of the screw plate. Sized in Z to match the upper nut holder; centered on
-// the rail in Z so the screw axis runs through the rail.
+// the rail in Z so the screw axis runs through the rail. The underside is
+// hulled down to the rail base bottom corner, producing a sloped self-
+// supporting print face — no support material needed under the block.
 module side_nut_holder() {
-    translate([side_nut_holder_x_center,
-               side_nut_holder_y_center,
-               side_nut_holder_z_center])
-        cube([side_nut_holder_x_size,
-              side_nut_holder_y_size,
-              side_nut_holder_z_size], center = true);
+    hull() {
+        // Main block, sized for the nut, centered on the rail in Z.
+        translate([side_nut_holder_x_center,
+                   side_nut_holder_y_center,
+                   side_nut_holder_z_center])
+            cube([side_nut_holder_x_size,
+                  side_nut_holder_y_size,
+                  side_nut_holder_z_size], center = true);
+        // Anchor strip at the rail base outer Y face, at the rail base
+        // bottom Z. The hull pulls the block's outer-bottom edge down to
+        // here along a flat slope so the underside is self-supporting.
+        translate([side_nut_holder_x_center,
+                   side_nut_holder_y_inner,
+                   rail_base_bot_z + rail_base_corner_r])
+            cube([side_nut_holder_x_size, eps, eps], center = true);
+    }
 }
 
 //==============================================================================
