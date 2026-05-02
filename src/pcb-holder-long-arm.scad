@@ -37,7 +37,7 @@ retainer_boss_od            = 16.5;  // mm - boss OD on the inner (-X) side face
 retainer_boss_protrude      = 3.5;   // mm - how far the boss sticks in -X direction
 
 // Hand screw (locks the retainer bolt; threads in from the -Y back face)
-hand_screw_thread_d  = 3.85;  // mm - measured at thread crests
+hand_screw_thread_d  = 4;  // mm - measured at thread crests
 hand_screw_nut_af    = 7;     // mm - hex nut, across-flats (M4)
 hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 
@@ -128,7 +128,7 @@ use_rounded_top = true;
 // bolt axis. Wall thickness around the rail matches `wall_thickness`.
 rail_y         = 30;     // mm - rail cross-section width  (Y axis)
 rail_z         = 15;     // mm - rail cross-section height (Z axis)
-rail_clearance = 0.3;    // mm - per-side slip-fit clearance around the rail
+rail_clearance = 0.2;    // mm - per-side slip-fit clearance around the rail
 rail_base_x    = 40;     // mm - X length of the rail base (grip along the rail)
 rail_base_corner_r = 1.75;  // mm - radius on the 4 outer corners (viewed along X)
 
@@ -153,7 +153,7 @@ screw_plate_half_x_keep = +1;  // -1: keep -X edge; +1: keep +X edge
 // the half-width plate; the other is on the full-width plate, centered on
 // the half opposite to the half-width plate (so the two holes sit on a
 // diagonal across the rail base).
-screw_plate_screw_d = 2.5;       // mm - mounting screw diameter
+screw_plate_screw_d = 4;       // mm - mounting screw diameter
 
 // Side nut holder: a block on the outer Y face of the rail base (on the same
 // Y side as the half-width screw plate), centered above the half-width
