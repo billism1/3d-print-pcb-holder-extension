@@ -112,7 +112,7 @@ hand_screw_blind_overshoot = 0.5;   // mm past bolt axis (into inside boss mater
 // External top boss is hollowed into a stubby tube so the PCB bracket's
 // round peg can insert into it. Wall thickness is the radial material left
 // between the inlet (ID) and the boss OD.
-top_boss_wall = 2;   // mm - radial wall of the boss tube
+top_boss_wall = 2.1;   // mm - radial wall of the boss tube
 
 // Rounded edges (matches the look of the original arm in the photo):
 // - edge_corner_radius rounds the two -X (PCB-facing) vertical edges, the
@@ -128,7 +128,7 @@ top_corner_radius  = 2;     // mm
 //   false = beveled (single flat chamfer slab — original look)
 //   true  = rounded (quarter-circle profile, smooth dome)
 // Default: beveled.
-use_rounded_top = false;
+use_rounded_top = true;
 
 // Snap-fit lips on the cavity side of the +Y/-Y walls, lower portion of the
 // sleeve only. Wedge-shaped: flush with the cavity face at the -X end of
@@ -158,7 +158,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 64;
+$fn = 164;
 $fa = 0.5;
 $fs = 0.1;
 
