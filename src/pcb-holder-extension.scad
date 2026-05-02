@@ -91,8 +91,8 @@ inside_boss_length = 13;     // mm - extent into cavity in +X direction
 // the -Y side. Provides material for the hand-screw nut nook with floor +
 // ceiling capture. Overlaps the cylindrical boss so they merge into one
 // solid mass.
-nut_holder_wall_thickness = wall_thickness;
-nut_holder_x      = inside_boss_length;                                     // mm - X depth into cavity from -X cavity face
+nut_holder_wall_thickness = 1.5;
+nut_holder_x      = inside_boss_length - 4;                                 // mm - X depth into cavity from -X cavity face
 nut_holder_y_to   = -6;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
 nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // mm - vertical height (centered on upper_bolt_z)
 
@@ -128,7 +128,7 @@ top_corner_radius  = 2;     // mm
 //   false = beveled (single flat chamfer slab — original look)
 //   true  = rounded (quarter-circle profile, smooth dome)
 // Default: beveled.
-use_rounded_top = true;
+use_rounded_top = false;
 
 // Snap-fit lips on the cavity side of the +Y/-Y walls, lower portion of the
 // sleeve only. Wedge-shaped: flush with the cavity face at the -X end of
