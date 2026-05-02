@@ -142,6 +142,13 @@ screw_plate_extend_y = 10;   // mm - Y extent past the rail base outer face
 screw_plate_z        = 3;    // mm - plate thickness (Z)
 screw_plate_corner_r = 2;    // mm - radius on the 2 outer corners
 
+// One of the two screw plates is half-width to clear room for another part.
+// Pick which Y side gets the half-width plate, and which X edge stays at its
+// full-width position; the other X edge moves to the rail base X center
+// (so the half plate ends up half the original X width).
+screw_plate_half_y_dir  = +1;  // -1: -Y plate is half-width; +1: +Y plate is half-width
+screw_plate_half_x_keep = +1;  // -1: keep -X edge; +1: keep +X edge
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -458,21 +465,28 @@ module screw_plates() {
     plate_y_total = screw_plate_extend_y + overlap;
     r = screw_plate_corner_r;
 
-    for (y_dir = [-1, +1])
-        translate([-wall_x_trim / 2,
+    for (y_dir = [-1, +1]) {
+        is_half = (y_dir == screw_plate_half_y_dir);
+        plate_w = is_half ? screw_plate_x / 2 : screw_plate_x;
+        // Half plate shifts so the kept X edge stays at its full-width
+        // position; the cut X end ends at the rail base X center.
+        x_shift = is_half ? screw_plate_half_x_keep * screw_plate_x / 4 : 0;
+
+        translate([-wall_x_trim / 2 + x_shift,
                    y_dir * (rail_base_outer_y / 2 - overlap),
                    rail_base_bot_z])
             linear_extrude(height = screw_plate_z)
                 hull() {
                     // Inner sharp edge at local y = 0 (sits inside the rail base)
-                    translate([-screw_plate_x / 2, -eps / 2])
-                        square([screw_plate_x, eps]);
+                    translate([-plate_w / 2, -eps / 2])
+                        square([plate_w, eps]);
                     // Outer rounded corners at local y = y_dir * (plate_y_total - r)
-                    translate([-screw_plate_x / 2 + r, y_dir * (plate_y_total - r)])
+                    translate([-plate_w / 2 + r, y_dir * (plate_y_total - r)])
                         circle(r = r);
-                    translate([+screw_plate_x / 2 - r, y_dir * (plate_y_total - r)])
+                    translate([+plate_w / 2 - r, y_dir * (plate_y_total - r)])
                         circle(r = r);
                 }
+    }
 }
 
 //==============================================================================
