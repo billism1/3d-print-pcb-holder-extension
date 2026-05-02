@@ -93,7 +93,7 @@ inside_boss_length = 13;     // mm - extent into cavity in +X direction
 // solid mass.
 nut_holder_wall_thickness = wall_thickness;
 nut_holder_x      = inside_boss_length;                                     // mm - X depth into cavity from -X cavity face
-nut_holder_y_to   = -2;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
+nut_holder_y_to   = -6;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
 nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // mm - vertical height (centered on upper_bolt_z)
 
 // Hand-screw nut nook (rectangular slot inside the nut holder block).
