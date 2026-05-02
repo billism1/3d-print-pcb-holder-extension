@@ -129,8 +129,18 @@ use_rounded_top = false;
 rail_y         = 29;     // mm - rail cross-section width  (Y axis)
 rail_z         = 14;     // mm - rail cross-section height (Z axis)
 rail_clearance = 0.3;    // mm - per-side slip-fit clearance around the rail
-rail_base_x    = 30;     // mm - X length of the rail base (grip along the rail)
+rail_base_x    = 40;     // mm - X length of the rail base (grip along the rail)
 rail_base_corner_r = 2;  // mm - radius on the 4 outer corners (viewed along X)
+
+// Screw plate mount: flat flange tabs on the bottom of the rail base sticking
+// out in +Y and -Y, for screwing the holder down to a platform. Plate bottoms
+// are flush with the rail base bottom so the whole mount sits flat. Only the
+// 2 outer corners (at the far Y end of each plate) are rounded; screw holes
+// will be added later.
+screw_plate_x        = 29;   // mm - X width (centered on the rail base)
+screw_plate_extend_y = 10;   // mm - Y extent past the rail base outer face
+screw_plate_z        = 3;    // mm - plate thickness (Z)
+screw_plate_corner_r = 2;    // mm - radius on the 2 outer corners
 
 //==============================================================================
 // 3. TOLERANCES
@@ -438,6 +448,33 @@ module rail_base() {
     }
 }
 
+// Screw plates: flat flange tabs on the bottom of the rail base sticking out
+// in +Y and -Y. Bottoms flush with rail_base_bot_z so the assembly sits flat
+// on a platform. Each plate's inner Y end overlaps the rail base by
+// wall_thickness so the union covers the rail base bottom-corner rounding;
+// the outer Y end has 2 rounded corners.
+module screw_plates() {
+    overlap = wall_thickness;
+    plate_y_total = screw_plate_extend_y + overlap;
+    r = screw_plate_corner_r;
+
+    for (y_dir = [-1, +1])
+        translate([-wall_x_trim / 2,
+                   y_dir * (rail_base_outer_y / 2 - overlap),
+                   rail_base_bot_z])
+            linear_extrude(height = screw_plate_z)
+                hull() {
+                    // Inner sharp edge at local y = 0 (sits inside the rail base)
+                    translate([-screw_plate_x / 2, -eps / 2])
+                        square([screw_plate_x, eps]);
+                    // Outer rounded corners at local y = y_dir * (plate_y_total - r)
+                    translate([-screw_plate_x / 2 + r, y_dir * (plate_y_total - r)])
+                        circle(r = r);
+                    translate([+screw_plate_x / 2 - r, y_dir * (plate_y_total - r)])
+                        circle(r = r);
+                }
+}
+
 //==============================================================================
 // 8. SUBTRACTIONS (holes + nut pockets)
 //==============================================================================
@@ -518,6 +555,7 @@ module long_arm() {
                 nut_holder();
             }
             rail_base();
+            screw_plates();
         }
         upper_bolt_hole();
         top_boss_inlet();
