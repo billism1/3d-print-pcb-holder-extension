@@ -36,9 +36,8 @@ arm_height   = 80;   // mm
 
 // Retainer-bolt hole on the arm
 retainer_bolt_hole_d        = 5;     // mm
-retainer_bolt_z_from_bottom = 65;    // mm - center of hole, from arm bottom
 retainer_boss_od            = 16.5;  // mm - boss OD on the inner side face
-retainer_boss_protrude      = 3.5;     // mm - how far the boss sticks toward center
+retainer_boss_protrude      = 3.5;   // mm - how far the boss sticks toward center
 
 // Hand screw (locks the retainer bolt; threads in from front-or-back face)
 hand_screw_thread_d  = 3.85;  // mm - measured at thread crests
@@ -53,21 +52,6 @@ extension_height = 80;   // mm - rise above arm top (parameter; tune as needed)
 sleeve_depth     = 84;   // mm - how far the sleeve covers the arm from the top
 wall_thickness   = 3;    // mm
 
-// Vertical thickness of the sleeve ceiling. Defaults to wall_thickness so
-// the ceiling matches the side walls. Increase to lower the ceiling: the
-// arm seats deeper into the sleeve, and the lower bolt hole position
-// follows automatically (see derived `lower_bolt_z`).
-// Example: set to wall_thickness + 2 to lower the ceiling by 2 mm.
-sleeve_ceiling_thickness = wall_thickness;   // mm
-
-// Optional manual Z offset for the lower bolt hole, on top of the auto
-// position derived from where the arm seats. Positive moves the hole up
-// (less negative Z), negative moves it down. Use to fine-tune alignment
-// with the actual arm if measurements drift.
-lower_bolt_z_tweak = 3.5;   // mm
-
-raise_base_ext_sep_wall = 2.5;
-
 // Trim length of the side walls (+Y, -Y) and the closed -X wall along the
 // X axis. Shrinks the outer body width by this amount on the open (+X) side
 // only so the -X wall position is preserved and the +X face moves inward.
@@ -75,11 +59,6 @@ wall_x_trim      = 3.5;    // mm
 
 // Mirrors original arm: top mounting hole this far below extension top
 top_bolt_offset_from_top = 12;
-
-// Boss clearance: hole on the -X wall at lower_bolt_z that lets the arm's
-// 15.8 mm boss seat fully through the wall. With wall_thickness < boss
-// protrusion, this hole punches all the way through the -X wall.
-boss_recess_clearance = -0.45;   // mm - added to OD for slip fit over boss
 
 // Inside boss: cylindrical sleeve on the cavity side of the -X wall around
 // the upper bolt hole. Mimics the round wall on the original arm interior —
@@ -129,6 +108,15 @@ top_corner_radius  = 2;     // mm
 //   true  = rounded (quarter-circle profile, smooth dome)
 // Default: beveled.
 use_rounded_top = true;
+
+// Rail base: rectangular box at the bottom of the arm with a through-hole
+// along the X axis. The fixed rail slides through the hole; the entire arm
+// translates along the rail in X. The rail runs parallel to the retainer
+// bolt axis. Wall thickness around the rail matches `wall_thickness`.
+rail_y         = 29;     // mm - rail cross-section width  (Y axis)
+rail_z         = 14;     // mm - rail cross-section height (Z axis)
+rail_clearance = 0.3;    // mm - per-side slip-fit clearance around the rail
+rail_base_x    = 30;     // mm - X length of the rail base (grip along the rail)
 
 //==============================================================================
 // 3. TOLERANCES
@@ -184,18 +172,6 @@ upper_outer_y_base = upper_y_base + 2 * wall_thickness;
 upper_outer_x_topz = upper_x_topz + 2 * wall_thickness;
 upper_outer_y_topz = upper_y_topz + 2 * wall_thickness;
 
-// Where the arm's top seats in the sleeve. With a ceiling, the arm stops
-// against the underside of the ceiling material at Z = -sleeve_ceiling_thickness.
-arm_seat_top_z = -sleeve_ceiling_thickness - raise_base_ext_sep_wall;
-
-// Lower bolt hole Z (in extension coords). The arm's bolt is
-// (arm_height - retainer_bolt_z_from_bottom) below the arm's top, so the
-// bolt's Z relative to the extension is the seat position minus that offset.
-// Add the manual tweak for fine alignment.
-lower_bolt_z = arm_seat_top_z
-             - (arm_height - retainer_bolt_z_from_bottom)
-             + lower_bolt_z_tweak;
-
 // Upper bolt hole Z (mirrors arm geometry, measured from extension top)
 upper_bolt_z = extension_height - top_bolt_offset_from_top;
 
@@ -219,6 +195,19 @@ top_boss_top_z   = upper_bolt_z + retainer_boss_od / 2;
 top_boss_x_face  = -(upper_outer_x_base
                      + (upper_outer_x_topz - upper_outer_x_base)
                        * (top_boss_top_z / extension_height)) / 2;
+
+// Rail base derived dimensions.
+// Inner cavity = rail cross-section + slip-fit clearance per side.
+// Outer       = cavity + wall_thickness per side.
+rail_cavity_y     = rail_y + 2 * rail_clearance;
+rail_cavity_z     = rail_z + 2 * rail_clearance;
+rail_base_outer_y = rail_cavity_y + 2 * wall_thickness;
+rail_base_outer_z = rail_cavity_z + 2 * wall_thickness;
+
+// Top of the rail base meets the bottom of the sleeve at Z = -sleeve_depth.
+rail_base_top_z    = -sleeve_depth;
+rail_base_bot_z    = rail_base_top_z - rail_base_outer_z;
+rail_base_center_z = (rail_base_top_z + rail_base_bot_z) / 2;
 
 //==============================================================================
 // 6. HELPER MODULES
@@ -342,14 +331,12 @@ module sleeve_shell() {
                                  edge_corner_radius);
         // Cavity, shifted +X by wall_thickness so it punches the +X wall
         // entirely while leaving the -X wall intact at full thickness.
-        // Cavity stops wall_thickness below the top of the sleeve so the
-        // top of the sleeve becomes a horizontal ceiling (also acts as the
-        // floor for the upper body interior). The arm seats with its top
-        // against this ceiling at Z = -wall_thickness.
+        // Open all the way up to Z = 0 so it merges with the upper body
+        // cavity (no horizontal ceiling at the seam).
         translate([wall_thickness, 0, 0])
             tapered_box(cavity_x_bot + 2 * wall_thickness, cavity_y_bot,
                         cavity_x_top + 2 * wall_thickness, cavity_y_top,
-                        -sleeve_depth - eps, arm_seat_top_z);
+                        -sleeve_depth - eps, eps);
     }
 }
 
@@ -419,28 +406,31 @@ module top_boss_inlet() {
             cylinder(d = inlet_id, h = retainer_boss_protrude + eps);
 }
 
+// Rail base: rectangular box at the bottom of the arm. A rectangular rail
+// (rail_y x rail_z cross-section) slides through it along the X axis, so
+// the entire arm translates along the rail. Top of the base meets the
+// bottom of the sleeve at Z = -sleeve_depth. Centered on Y = 0 (rail/bolt
+// axis); centered in X on the sleeve's outer center (-wall_x_trim/2).
+module rail_base() {
+    bx = rail_base_x;
+    by = rail_base_outer_y;
+    bz = rail_base_outer_z;
+
+    cx = bx + 2 * eps;       // through-hole punches all the way through X
+    cy = rail_cavity_y;
+    cz = rail_cavity_z;
+
+    translate([-wall_x_trim / 2, 0, rail_base_center_z]) {
+        difference() {
+            cube([bx, by, bz], center = true);
+            cube([cx, cy, cz], center = true);
+        }
+    }
+}
+
 //==============================================================================
 // 8. SUBTRACTIONS (holes + nut pockets)
 //==============================================================================
-
-// Boss clearance hole through the -X wall at lower_bolt_z.
-// Sized to let the arm's 15.8 mm boss seat fully through the wall as the
-// extension is pressed onto the arm from the inside. The boss tip will
-// protrude slightly past the -X face (boss is 4 mm, wall is 3 mm).
-// The bolt threads through the boss + arm; the user holds an M4 nut against
-// the arm's outer face, which is accessible through the open +X side.
-//
-// The cylinder is centered at X = 0 and made longer than the full sleeve
-// width so it punches the -X wall cleanly at every Z within its vertical
-// extent (the sleeve tapers, so a per-Z fit would leave thin slivers at the
-// top/bottom of the boss cut). The +X half passes through open cavity.
-module lower_mount_subtractions() {
-    translate([0, 0, lower_bolt_z])
-        rotate([0, 90, 0])
-            cylinder(d = retainer_boss_od + boss_recess_clearance,
-                     h = sleeve_x_bot * 2,
-                     center = true);
-}
 
 // Upper bolt hole: through the top boss, the upper body, AND the inside
 // cylindrical boss on the cavity side. The inside boss's +X tip can reach
@@ -517,8 +507,8 @@ module extension_piece() {
                 inside_cyl_boss();
                 nut_holder();
             }
+            rail_base();
         }
-        lower_mount_subtractions();
         upper_bolt_hole();
         top_boss_inlet();
         hand_screw_subtractions();
