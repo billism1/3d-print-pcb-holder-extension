@@ -149,6 +149,12 @@ screw_plate_corner_r = 2;    // mm - radius on the 2 outer corners
 screw_plate_half_y_dir  = +1;  // -1: -Y plate is half-width; +1: +Y plate is half-width
 screw_plate_half_x_keep = +1;  // -1: keep -X edge; +1: keep +X edge
 
+// Mounting screw through-holes in the screw plates. One hole is centered on
+// the half-width plate; the other is on the full-width plate, centered on
+// the half opposite to the half-width plate (so the two holes sit on a
+// diagonal across the rail base).
+screw_plate_screw_d = 2.5;       // mm - mounting screw diameter
+
 //==============================================================================
 // 3. TOLERANCES
 //==============================================================================
@@ -547,6 +553,30 @@ module nut_nook_subtraction() {
         cube([slot_x_size, ny, nz], center = true);
 }
 
+// Screw plate mounting holes: one through the half-width plate (centered on
+// it) and one through the full-width plate at its OPPOSITE half (i.e. mirrored
+// across both rail base axes), so the two screws sit on a diagonal.
+module screw_plate_holes() {
+    hole_d  = screw_plate_screw_d + bolt_clearance;
+    x_base  = -wall_x_trim / 2;
+    x_off   = screw_plate_x / 4;                              // half-of-half center
+    y_off   = rail_base_outer_y / 2 + screw_plate_extend_y / 2; // center of the exposed flange
+    z_start = rail_base_bot_z - eps;
+    h       = screw_plate_z + 2 * eps;
+
+    // Hole in the half-width plate
+    translate([x_base + screw_plate_half_x_keep * x_off,
+               screw_plate_half_y_dir * y_off,
+               z_start])
+        cylinder(d = hole_d, h = h);
+
+    // Hole in the full-width plate, on the half opposite to the half-width plate
+    translate([x_base - screw_plate_half_x_keep * x_off,
+               -screw_plate_half_y_dir * y_off,
+               z_start])
+        cylinder(d = hole_d, h = h);
+}
+
 //==============================================================================
 // 9. TOP-LEVEL LONG ARM PIECE
 //==============================================================================
@@ -575,6 +605,7 @@ module long_arm() {
         top_boss_inlet();
         hand_screw_subtractions();
         nut_nook_subtraction();
+        screw_plate_holes();
     }
 }
 
