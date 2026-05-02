@@ -17,8 +17,11 @@
 //   -X = inner side  — closed wall; faces PCB center; carries top boss
 //   +Y = front       — closed wall; carries hand-screw through-hole
 //   -Y = back        — closed wall; carries hand-screw nut pocket
-//   +Z = up          — origin Z = 0 sits at the "shoulder" plane where the
-//                      top boss, upper bolt, and hand-screw hardware attach
+//   +Z = up          — internally, Z = 0 sits at the "shoulder" plane where
+//                      the top boss, upper bolt, and hand-screw hardware
+//                      attach. The final long_arm() output is lifted so the
+//                      bottom of the rail base rests on the Z = 0 plane
+//                      (ready to drop straight onto a printer bed).
 //==============================================================================
 
 //==============================================================================
@@ -498,6 +501,8 @@ module nut_nook_subtraction() {
 //==============================================================================
 
 module long_arm() {
+    // Lift so the bottom of the rail base sits at Z = 0.
+    translate([0, 0, lower_height + rail_base_outer_z])
     difference() {
         union() {
             lower_body();
