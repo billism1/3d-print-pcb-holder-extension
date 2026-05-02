@@ -124,6 +124,12 @@ top_boss_wall = 2;   // mm - radial wall of the boss tube
 edge_corner_radius = 1.5;   // mm
 top_corner_radius  = 2;     // mm
 
+// Top-edge style:
+//   false = beveled (single flat chamfer slab — original look)
+//   true  = rounded (quarter-circle profile, smooth dome)
+// Default: beveled.
+use_rounded_top = true;
+
 // Snap-fit lips on the cavity side of the +Y/-Y walls, lower portion of the
 // sleeve only. Wedge-shaped: flush with the cavity face at the -X end of
 // the wedge, protruding into the cavity by snap_fit_lip at the +X end (the
@@ -152,7 +158,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 164;
+$fn = 180;
 $fa = 0.5;
 $fs = 0.1;
 
@@ -263,10 +269,11 @@ module rounded_slab_2d(x, y, r) {
     }
 }
 
-// Tapered body with rounded -X vertical edges and an optional rounded top.
-// r_corner: vertical-edge radius. r_top: top-edge radius (0 = sharp top).
-// The top rounding follows a quarter-circle profile, sampled with N slabs
-// hulled together so the result is a smooth curve, not a flat bevel.
+// Tapered body with rounded -X vertical edges and an optional top-edge
+// treatment. r_corner: vertical-edge radius. r_top: top-edge radius
+// (0 = sharp top). The top is either beveled (single flat chamfer) or
+// rounded (quarter-circle profile sampled with N slabs hulled together),
+// chosen by the global `use_rounded_top` flag.
 module rounded_tapered_body(x_bot, y_bot, x_top, y_top, z_bot, z_top,
                             r_corner, r_top = 0) {
     if (r_top > 0) {
@@ -274,29 +281,42 @@ module rounded_tapered_body(x_bot, y_bot, x_top, y_top, z_bot, z_top,
         z_frac        = (z_round_start - z_bot) / (z_top - z_bot);
         x_at_round    = x_bot + (x_top - x_bot) * z_frac;
         y_at_round    = y_bot + (y_top - y_bot) * z_frac;
-        n_top_samples = 12;
         union() {
-            // Main body up to where the rounding starts
+            // Main body up to where the top treatment starts
             hull() {
                 translate([0, 0, z_bot])
                     rounded_slab_2d(x_bot, y_bot, r_corner);
                 translate([0, 0, z_round_start])
                     rounded_slab_2d(x_at_round, y_at_round, r_corner);
             }
-            // Rounded top cap. Each sample's (z_sample, inset) lies on a
-            // quarter-circle centered at (x_at_round/2 - r_top, z_round_start)
-            // with radius r_top. Hulling all the sample slabs produces a
-            // smoothly curved top edge.
-            hull() {
-                for (i = [0 : n_top_samples]) {
-                    angle    = (i / n_top_samples) * 90;
-                    inset    = r_top * (1 - cos(angle));
-                    dz       = r_top * sin(angle);
-                    z_sample = z_round_start + dz;
-                    x_sample = max(x_at_round - 2 * inset, 2 * r_corner + eps);
-                    y_sample = max(y_at_round - 2 * inset, 2 * r_corner + eps);
-                    translate([0, 0, z_sample])
-                        rounded_slab_2d(x_sample, y_sample, r_corner);
+            if (use_rounded_top) {
+                // Rounded top cap: quarter-circle profile sampled with N
+                // slabs hulled together.
+                n_top_samples = 12;
+                hull() {
+                    for (i = [0 : n_top_samples]) {
+                        angle    = (i / n_top_samples) * 90;
+                        inset    = r_top * (1 - cos(angle));
+                        dz       = r_top * sin(angle);
+                        z_sample = z_round_start + dz;
+                        x_sample = max(x_at_round - 2 * inset, 2 * r_corner + eps);
+                        y_sample = max(y_at_round - 2 * inset, 2 * r_corner + eps);
+                        translate([0, 0, z_sample])
+                            rounded_slab_2d(x_sample, y_sample, r_corner);
+                    }
+                }
+            } else {
+                // Beveled top cap: single flat chamfer slab from the
+                // full cross-section at z_round_start to a smaller
+                // cross-section at z_top.
+                hull() {
+                    translate([0, 0, z_round_start])
+                        rounded_slab_2d(x_at_round, y_at_round, r_corner);
+                    translate([0, 0, z_top])
+                        rounded_slab_2d(
+                            max(x_at_round - 2 * r_top, 2 * eps),
+                            max(y_at_round - 2 * r_top, 2 * eps),
+                            max(r_corner - r_top, eps));
                 }
             }
         }
