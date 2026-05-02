@@ -56,8 +56,8 @@ body_x_bottom = 29.875;   // mm - X width  (left-right, retainer bolt axis)
 body_y_bottom = 31.25;    // mm - Y depth  (front-to-back, hand screw axis)
 
 // Body OUTER cross-section at the TOP (Z = upper_height)
-body_x_top    = 18;     // mm
-body_y_top    = 21;       // mm
+body_x_top    = 20;     // mm
+body_y_top    = 20;     // mm
 
 // Section heights, split at Z = 0
 lower_height = 84;   // mm - body extent below the shoulder (down to rail base)
@@ -84,7 +84,7 @@ inside_boss_length = 13;    // mm - extent into cavity in +X direction
 // ceiling capture. Overlaps the cylindrical boss so they merge into one
 // solid mass.
 nut_holder_wall_thickness = 1.5;
-nut_holder_x      = inside_boss_length - 0.96;                                 // mm - X depth into cavity from -X cavity face
+nut_holder_x      = inside_boss_length;                                 // mm - X depth into cavity from -X cavity face
 nut_holder_y_to   = -6;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
 nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // mm - vertical height (centered on upper_bolt_z)
 
