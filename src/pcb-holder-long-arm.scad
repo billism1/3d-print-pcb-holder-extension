@@ -130,7 +130,7 @@ rail_y         = 30;     // mm - rail cross-section width  (Y axis)
 rail_z         = 15;     // mm - rail cross-section height (Z axis)
 rail_clearance = 0.2;    // mm - per-side slip-fit clearance around the rail
 rail_base_x    = 40;     // mm - X length of the rail base (grip along the rail)
-rail_base_corner_r = 1.75;  // mm - radius on the 4 outer corners (viewed along X)
+rail_base_corner_r = 2;  // mm - radius on the 4 outer corners (viewed along X)
 
 // Screw plate mount: flat flange tabs on the bottom of the rail base sticking
 // out in +Y and -Y, for screwing the holder down to a platform. Plate bottoms
