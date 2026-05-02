@@ -30,7 +30,7 @@ render_mirrored_piece = false;
 // Arm cross-section (tapers linearly bottom -> top over arm_height)
 arm_x_bottom = 23.5;   // mm - "front view" width  (left-right, retainer bolt axis)
 arm_x_top    = 16;
-arm_y_bottom = 30;   // mm - "side view" width   (front-to-back, hand screw axis)
+arm_y_bottom = 28.5;   // mm - "side view" width   (front-to-back, hand screw axis)
 arm_y_top    = 20;
 arm_height   = 80;   // mm
 
@@ -70,9 +70,9 @@ inside_boss_length = 13;     // mm - extent into cavity in +X direction
 // the -Y side. Provides material for the hand-screw nut nook with floor +
 // ceiling capture. Overlaps the cylindrical boss so they merge into one
 // solid mass.
-nut_holder_wall_thickness = wall_thickness;
-nut_holder_x      = inside_boss_length;                                     // mm - X depth into cavity from -X cavity face
-nut_holder_y_to   = -2;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
+nut_holder_wall_thickness = 1.5;
+nut_holder_x      = inside_boss_length - 4;                                 // mm - X depth into cavity from -X cavity face
+nut_holder_y_to   = -6;                                                     // mm - +Y extent (block runs from -Y inner wall to here)
 nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // mm - vertical height (centered on upper_bolt_z)
 
 // Hand-screw nut nook (rectangular slot inside the nut holder block).
@@ -80,9 +80,9 @@ nut_holder_z      = (nut_holder_wall_thickness * 2) + hand_screw_nut_af;    // m
 // assembly. Floor and ceiling within the block capture the nut vertically;
 // the slot's -Y wall backs up the nut when the screw is tightened.
 nut_nook_x_clear  = 0.5;    // mm - radial clearance past hex AV
-nut_nook_y_clear  = 0.4;    // mm - axial clearance past nut thickness
+nut_nook_y_clear  = 0.2;    // mm - axial clearance past nut thickness
 nut_nook_z_clear  = 0.1;    // mm - vertical clearance past hex AF
-nut_nook_y_center = -6.15;     // mm - Y of nut center along hand-screw path
+nut_nook_y_center = -5.5;   // mm - Y of nut center along hand-screw path
 
 // Hand-screw blind hole: enters from -Y, ends just past the bolt axis.
 // Does NOT punch through the +Y wall.
@@ -91,7 +91,7 @@ hand_screw_blind_overshoot = 0.5;   // mm past bolt axis (into inside boss mater
 // External top boss is hollowed into a stubby tube so the PCB bracket's
 // round peg can insert into it. Wall thickness is the radial material left
 // between the inlet (ID) and the boss OD.
-top_boss_wall = 2;   // mm - radial wall of the boss tube
+top_boss_wall = 2.1;   // mm - radial wall of the boss tube
 
 // Rounded edges (matches the look of the original arm in the photo):
 // - edge_corner_radius rounds the two -X (PCB-facing) vertical edges, the
@@ -107,7 +107,7 @@ top_corner_radius  = 2;     // mm
 //   false = beveled (single flat chamfer slab — original look)
 //   true  = rounded (quarter-circle profile, smooth dome)
 // Default: beveled.
-use_rounded_top = true;
+use_rounded_top = false;
 
 // Rail base: rectangular box at the bottom of the arm with a through-hole
 // along the X axis. The fixed rail slides through the hole; the entire arm
@@ -117,6 +117,7 @@ rail_y         = 29;     // mm - rail cross-section width  (Y axis)
 rail_z         = 14;     // mm - rail cross-section height (Z axis)
 rail_clearance = 0.3;    // mm - per-side slip-fit clearance around the rail
 rail_base_x    = 30;     // mm - X length of the rail base (grip along the rail)
+rail_base_corner_r = 2;  // mm - radius on the 4 outer corners (viewed along X)
 
 //==============================================================================
 // 3. TOLERANCES
@@ -420,9 +421,18 @@ module rail_base() {
     cy = rail_cavity_y;
     cz = rail_cavity_z;
 
+    r = min(rail_base_corner_r, by / 2 - eps, bz / 2 - eps);
+
     translate([-wall_x_trim / 2, 0, rail_base_center_z]) {
         difference() {
-            cube([bx, by, bz], center = true);
+            // Outer body: hull of 4 X-aligned cylinders at the corners,
+            // rounding the 4 edges visible looking along the X axis.
+            hull() {
+                for (dy = [-1, 1], dz = [-1, 1])
+                    translate([0, dy * (by / 2 - r), dz * (bz / 2 - r)])
+                        rotate([0, 90, 0])
+                            cylinder(r = r, h = bx, center = true);
+            }
             cube([cx, cy, cz], center = true);
         }
     }
