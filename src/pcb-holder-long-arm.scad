@@ -616,24 +616,32 @@ module screw_plates() {
 // hulled down to the rail base bottom corner, producing a sloped self-
 // supporting print face — no support material needed under the block.
 module side_nut_holder() {
-    r = side_nut_holder_corner_r;
-    // Sphere centers inset by r so block keeps its outer dimensions while
-    // gaining rounded edges and corners.
+    r  = side_nut_holder_corner_r;
     hx = side_nut_holder_x_size / 2 - r;
     hy = side_nut_holder_y_size / 2 - r;
     hz = side_nut_holder_z_size / 2 - r;
-    // Anchor sphere centers — also inset by r in X so the anchor's rounded
-    // ends match the block's X corner radius. The Y/Z position keeps the
-    // tapered underside meeting the rail base just above its bottom corner.
-    ax = side_nut_holder_x_size / 2 - r;
+
+    // Truncated box: full X/Z extent; Y truncated by r on the outer-Y end.
+    // Keeps the inner-Y face (against rail base), all 4 inner-Y corners,
+    // and all 4 Y-axis edges sharp. Outer-Y face perimeter rounded by the
+    // 4 corner spheres below.
+    box_y_size   = side_nut_holder_y_size - r;
+    box_y_center = side_nut_holder_y_inner
+                   + screw_plate_half_y_dir * box_y_size / 2;
+
     ay = side_nut_holder_y_inner;
     az = rail_base_bot_z + rail_base_corner_r;
 
     hull() {
-        // 8 corner spheres: rounded block centered on the rail.
-        for (sx = [-1, +1], sy = [-1, +1], sz = [-1, +1])
+        // Sharp truncated box: sharp inner-Y face + sharp Y-axis edges.
+        translate([side_nut_holder_x_center, box_y_center, side_nut_holder_z_center])
+            cube([side_nut_holder_x_size, box_y_size, side_nut_holder_z_size],
+                 center = true);
+        // 4 corner spheres on the outer-Y end — round only the outer-Y
+        // face perimeter (4 outer corners + 4 outer-face edges).
+        for (sx = [-1, +1], sz = [-1, +1])
             translate([side_nut_holder_x_center + sx * hx,
-                       side_nut_holder_y_center + sy * hy,
+                       side_nut_holder_y_center + screw_plate_half_y_dir * hy,
                        side_nut_holder_z_center + sz * hz])
                 sphere(r = r);
         // Sharp anchor strip at the rail base outer face, just above the
