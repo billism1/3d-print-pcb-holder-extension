@@ -120,7 +120,7 @@ top_corner_radius  = 2;     // mm
 //   false = beveled (single flat chamfer slab — original look)
 //   true  = rounded (quarter-circle profile, smooth dome)
 // Default: beveled.
-use_rounded_top = false;
+use_rounded_top = true;
 
 // Rail base: rectangular box at the bottom of the body with a through-hole
 // along the X axis. The fixed rail slides through the hole; the entire arm
