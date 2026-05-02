@@ -175,9 +175,18 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 44;
-$fa = 0.5;
-$fs = 0.1;
+// Use adaptive curve resolution instead of fixed segments.
+// Matches typical FDM print resolution (~0.4mm nozzle), avoids excessive polygon count.
+// Keeps previews fast and STL sizes small while maintaining smooth enough curves.
+$fn = 0;   // Disable fixed segment count so $fa/$fs control detail
+
+// Limit angular resolution: ~2° per segment.
+// Provides good roundness for small holes/bosses without over-detailing.
+$fa = 2;
+
+// Limit linear segment length to ~0.4mm (≈ nozzle size).
+// Prevents generating detail finer than the printer can reproduce.
+$fs = 0.4;
 
 //==============================================================================
 // 5. DERIVED DIMENSIONS
