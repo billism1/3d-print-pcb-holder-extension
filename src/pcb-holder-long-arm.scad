@@ -172,7 +172,7 @@ side_nut_holder_x_size = screw_plate_x / 2;   // mm - X width (matches the empty
 // pocket diameter = pin_head_d + pin_head_d_clearance).
 pin_shaft_d              = 3;     // mm - pin shaft diameter
 pin_shaft_d_clearance    = 0.2;   // mm - shaft hole diameter clearance
-pin_head_d               = 3.6;   // mm - pin head diameter
+pin_head_d               = 4.5;   // mm - pin head diameter
 pin_head_d_clearance     = 0.4;   // mm - head pocket diameter clearance
 pin_head_thick           = 2.1;   // mm - pin head thickness (along screw axis)
 pin_head_thick_clearance = 0.3;   // mm - head pocket axial clearance
@@ -296,8 +296,12 @@ side_nut_holder_z_center = rail_base_center_z;
 //   3) Shaft hole: continues from the pocket back through the rest of the
 //      rail base wall and into the cavity so the pin shaft can press the
 //      rail.
-side_pin_outer_hole_d  = side_screw_outer_hole_d + side_screw_outer_hole_d_clearance;
 side_pin_pocket_d      = pin_head_d  + pin_head_d_clearance;
+// Outer hole must be at least as wide as the pocket so the pin head can pass
+// through it during assembly; take the max of the configured outer-hole
+// diameter and the pocket diameter.
+side_pin_outer_hole_d  = max(side_screw_outer_hole_d + side_screw_outer_hole_d_clearance,
+                             side_pin_pocket_d);
 side_pin_pocket_y      = pin_head_thick + pin_head_thick_clearance;
 side_pin_shaft_hole_d  = pin_shaft_d + pin_shaft_d_clearance;
 side_pin_pocket_back_y = side_nut_holder_y_inner
