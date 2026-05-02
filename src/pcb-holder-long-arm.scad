@@ -56,7 +56,7 @@ body_x_bottom = 29.875;   // mm - X width  (left-right, retainer bolt axis)
 body_y_bottom = 31.25;    // mm - Y depth  (front-to-back, hand screw axis)
 
 // Body OUTER cross-section at the TOP (Z = upper_height)
-body_x_top    = 20;     // mm
+body_x_top    = 18.5;     // mm
 body_y_top    = 20;     // mm
 
 // Section heights, split at Z = 0
