@@ -162,6 +162,7 @@ screw_plate_screw_d = 4;       // mm - mounting screw diameter
 // rail base wall, and presses against the rail to lock the arm in place
 // along the rail. Reuses the same nut and screw size as the upper hand-screw.
 side_nut_holder_x_size = screw_plate_x / 2;   // mm - X width (matches the empty area span)
+side_nut_holder_corner_r = 1.5;               // mm - radius rounding all block edges/corners
 
 // Plastic pin between the rail-locking hand-screw and the rail. The screw
 // pushes the pin head; the pin shaft passes through the rail base outer
@@ -575,20 +576,32 @@ module screw_plates() {
 // hulled down to the rail base bottom corner, producing a sloped self-
 // supporting print face — no support material needed under the block.
 module side_nut_holder() {
+    r = side_nut_holder_corner_r;
+    // Sphere centers inset by r so block keeps its outer dimensions while
+    // gaining rounded edges and corners.
+    hx = side_nut_holder_x_size / 2 - r;
+    hy = side_nut_holder_y_size / 2 - r;
+    hz = side_nut_holder_z_size / 2 - r;
+    // Anchor sphere centers — also inset by r in X so the anchor's rounded
+    // ends match the block's X corner radius. The Y/Z position keeps the
+    // tapered underside meeting the rail base just above its bottom corner.
+    ax = side_nut_holder_x_size / 2 - r;
+    ay = side_nut_holder_y_inner;
+    az = rail_base_bot_z + rail_base_corner_r;
+
     hull() {
-        // Main block, sized for the nut, centered on the rail in Z.
-        translate([side_nut_holder_x_center,
-                   side_nut_holder_y_center,
-                   side_nut_holder_z_center])
-            cube([side_nut_holder_x_size,
-                  side_nut_holder_y_size,
-                  side_nut_holder_z_size], center = true);
-        // Anchor strip at the rail base outer Y face, at the rail base
-        // bottom Z. The hull pulls the block's outer-bottom edge down to
-        // here along a flat slope so the underside is self-supporting.
-        translate([side_nut_holder_x_center,
-                   side_nut_holder_y_inner,
-                   rail_base_bot_z + rail_base_corner_r])
+        // 8 corner spheres: rounded block centered on the rail.
+        for (sx = [-1, +1], sy = [-1, +1], sz = [-1, +1])
+            translate([side_nut_holder_x_center + sx * hx,
+                       side_nut_holder_y_center + sy * hy,
+                       side_nut_holder_z_center + sz * hz])
+                sphere(r = r);
+        // Sharp anchor strip at the rail base outer face, just above the
+        // rail base bottom corner. Hull pulls the block's outer-bottom
+        // edge down to here along a flat self-supporting slope. Strip is
+        // sharp (no sphere) so the slope's bottom edge stays a hard line
+        // — rounding it would create an unprintable horizontal overhang.
+        translate([side_nut_holder_x_center, ay, az])
             cube([side_nut_holder_x_size, eps, eps], center = true);
     }
 }
