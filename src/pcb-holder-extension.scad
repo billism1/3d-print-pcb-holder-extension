@@ -128,7 +128,7 @@ top_corner_radius  = 2;     // mm
 //   false = beveled (single flat chamfer slab — original look)
 //   true  = rounded (quarter-circle profile, smooth dome)
 // Default: beveled.
-use_rounded_top = true;
+use_rounded_top = false;
 
 // Snap-fit lips on the cavity side of the +Y/-Y walls, lower portion of the
 // sleeve only. Wedge-shaped: flush with the cavity face at the -X end of
@@ -158,7 +158,7 @@ eps               = 0.01;  // mm - epsilon to avoid coincident faces
 // 4. RENDER QUALITY
 //==============================================================================
 
-$fn = 164;
+$fn = 64;
 $fa = 0.5;
 $fs = 0.1;
 
