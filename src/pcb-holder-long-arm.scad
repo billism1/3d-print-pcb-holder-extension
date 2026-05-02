@@ -708,8 +708,39 @@ module nut_nook_subtraction() {
     slot_x_size  = slot_x_far - slot_x_min;
     slot_x_center = (slot_x_min + slot_x_far) / 2;
 
-    translate([slot_x_center, nut_nook_y_center, upper_bolt_z])
-        cube([slot_x_size, ny, nz], center = true);
+    // Nut-stop wedge: triangular fill at the slot's back-top corner. Its
+    // hypotenuse slopes at 60° from horizontal (matches the hex face
+    // orientation), so when the nut slides in -X its upper-left hex face
+    // mates flush with the slope and the leftmost hex vertex lands at
+    // X = -s. That puts the nut center (and threaded hole) on the screw
+    // axis at X = 0. The slope also gives the slot a self-supporting
+    // ceiling at the back so the print needs no support there.
+    s             = hand_screw_nut_af / sqrt(3);   // hex side length (AF = s*sqrt(3))
+    slope_start_x = -s;                             // nut leftmost vertex stop
+    slope_x_run   = nz / (2 * sqrt(3));             // 60° slope reaches slot top
+
+    difference() {
+        // Original rectangular slot.
+        translate([slot_x_center, nut_nook_y_center, upper_bolt_z])
+            cube([slot_x_size, ny, nz], center = true);
+        // Wedge inside the slot: pentagon profile filling the back of the
+        // slot from the floor (z = upper_bolt_z - nz/2) all the way to the
+        // top. Lower half is a vertical wall at slope_start_x (acts as the
+        // slot's back wall behind the nut floor); upper half slopes at 60°
+        // to mate with the hex face. Subtracted from the slot, so the body
+        // retains this pentagon as solid material — no void behind the
+        // slope when printed.
+        translate([0, nut_nook_y_center, 0])
+            rotate([90, 0, 0])
+                linear_extrude(height = ny + 2 * eps, center = true)
+                    polygon([
+                        [slot_x_min,                  upper_bolt_z - nz / 2],
+                        [slope_start_x,               upper_bolt_z - nz / 2],
+                        [slope_start_x,               upper_bolt_z],
+                        [slope_start_x + slope_x_run, upper_bolt_z + nz / 2],
+                        [slot_x_min,                  upper_bolt_z + nz / 2],
+                    ]);
+    }
 }
 
 // Screw plate mounting holes: one through the half-width plate (centered on
@@ -754,8 +785,32 @@ module side_nut_nook_subtraction() {
     slot_x_size   = slot_x_far - slot_x_min;
     slot_x_center = (slot_x_min + slot_x_far) / 2;
 
-    translate([slot_x_center, side_nut_holder_y_center, side_nut_holder_z_center])
-        cube([slot_x_size, ny, nz], center = true);
+    // Nut-stop wedge: same 60° hex-face slope as the upper nut nook so the
+    // nut self-aligns with the screw axis and the slot's back ceiling
+    // prints without support. Slope start placed so the nut leftmost
+    // vertex lands at side_nut_holder_x_center - s, putting the nut center
+    // on the screw axis at side_nut_holder_x_center.
+    s             = hand_screw_nut_af / sqrt(3);
+    slope_start_x = side_nut_holder_x_center - s;
+    slope_x_run   = nz / (2 * sqrt(3));
+
+    difference() {
+        translate([slot_x_center, side_nut_holder_y_center, side_nut_holder_z_center])
+            cube([slot_x_size, ny, nz], center = true);
+        // Pentagon wedge: vertical back wall (lower half) + 60° slope
+        // (upper half), solid all the way down to the slot floor so there
+        // is no void behind the slope when printed.
+        translate([0, side_nut_holder_y_center, 0])
+            rotate([90, 0, 0])
+                linear_extrude(height = ny + 2 * eps, center = true)
+                    polygon([
+                        [slot_x_min,                  side_nut_holder_z_center - nz / 2],
+                        [slope_start_x,               side_nut_holder_z_center - nz / 2],
+                        [slope_start_x,               side_nut_holder_z_center],
+                        [slope_start_x + slope_x_run, side_nut_holder_z_center + nz / 2],
+                        [slot_x_min,                  side_nut_holder_z_center + nz / 2],
+                    ]);
+    }
 }
 
 // Rail-locking pin bore: 3-stage hole along Y from the outer Y face of the
