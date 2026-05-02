@@ -181,7 +181,7 @@ pin_head_thick_clearance = 0.3;   // mm - head pocket axial clearance
 // Outer hole on the side nut holder's outer Y face. Sized so the pin head
 // (3.6 mm) drops through during assembly; the same bore carries the screw
 // threads (4 mm) when the screw is later installed.
-side_screw_outer_hole_d           = 4;     // mm - nominal outer-hole diameter
+side_screw_outer_hole_d           = 4.5;     // mm - nominal outer-hole diameter
 side_screw_outer_hole_d_clearance = 0.2;   // mm - outer-hole diameter clearance
 
 //==============================================================================
