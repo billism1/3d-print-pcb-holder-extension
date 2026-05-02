@@ -129,7 +129,7 @@ top_corner_radius  = 2;     // mm
 // the wedge, protruding into the cavity by snap_fit_lip at the +X end (the
 // open mouth). The +Y/-Y walls flex outward as the arm is pushed past the
 // wedge, gripping the arm via interference.
-snap_fit_lip      = 1;    // mm - inward depth at the lip's +X tip
+snap_fit_lip      = 1.5;    // mm - inward depth at the lip's +X tip
 snap_fit_x_length = 1.5;      // mm - X length of the wedge ramp
 snap_fit_z_top    = -25;    // mm - top Z of the lip range (extension coords)
 
