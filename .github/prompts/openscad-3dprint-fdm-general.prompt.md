@@ -36,6 +36,10 @@ Key differences from typical languages:
 - Overhangs up to **~45°** from vertical generally print without support; steeper angles may need chamfers or supports.
 - Design snap-fits and living hinges with grain direction (layer orientation) in mind.
 
+## OpenSCAD Cheatsheet
+
+https://openscad.org/cheatsheet/
+
 ## Common Patterns
 
 ### Rounded rectangle (cube with round XY edges)
