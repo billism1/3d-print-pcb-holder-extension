@@ -511,12 +511,20 @@ module top_boss_supported() {
 // shared anchor on the cavity -X wall. Replaces the bare cyl_boss + nut_holder
 // hull in long_arm() so both pieces print without support.
 module inside_cluster_supported() {
-    cavity_x_face = -cavity_x_at_ub / 2;
     cavity_y_face = -cavity_y_at_ub / 2;
 
     cluster_bottom_z = upper_bolt_z - max(inside_boss_od / 2, nut_holder_z / 2);
     z_drop           = max(inside_boss_length, nut_holder_x);
     z_anchor         = cluster_bottom_z - z_drop;
+
+    // Anchor X must follow the cavity -X wall at z_anchor (which moves -X
+    // as z decreases due to the body taper). Using a constant cavity_x_face
+    // (computed at upper_bolt_z) puts the anchor in cavity air at lower Z,
+    // so the wedge tip splinters off from the body wall during printing.
+    // overlap pushes the anchor a hair into the wall material so the hull
+    // tip merges cleanly with the body wall.
+    overlap  = wall_thickness / 2;
+    anchor_x = wall_thickness - body_outer_x_at(z_anchor) / 2 - overlap;
 
     y_min  = cavity_y_face;
     y_max  = inside_boss_od / 2;
@@ -527,7 +535,7 @@ module inside_cluster_supported() {
         nut_holder();
         // Y-aligned anchor strip at the cavity wall, lower Z. Spans the
         // combined Y extent of cyl boss + nut holder.
-        translate([cavity_x_face, y_min, z_anchor])
+        translate([anchor_x, y_min, z_anchor])
             cube([eps, y_size, eps]);
     }
 }
