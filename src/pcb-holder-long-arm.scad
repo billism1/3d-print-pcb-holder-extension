@@ -122,6 +122,34 @@ top_corner_radius  = 2;     // mm
 // Default: beveled.
 use_rounded_top = true;
 
+// Arm label: two-line text engraved into the top of the rail base, inside the
+// body cavity. Readable when looking straight down (-Z view). Set either line
+// to "" to render only the other (or both "" to disable entirely).
+render_arm_label     = true;   // master switch — false skips the engrave entirely
+arm_label_line_1     = "WFK";
+arm_label_line_2     = "";
+arm_label_size       = 5.5;      // mm - character height
+arm_label_line_spacing = arm_label_size * 1.3;  // mm - center-to-center between lines
+arm_label_depth      = 0.6;    // mm - engrave depth into the rail base top
+arm_label_x_center   = 4;   // mm - X center of text block on rail base top
+arm_label_y_center   = 0;      // mm - Y center of text block on rail base top
+arm_label_angle      = 90;     // deg - in-plane rotation (0 = along +X, 90 = along +Y)
+arm_label_mirror     = false;  // flip text horizontally if it reads backwards
+//arm_label_font       = "Goudy Stout:style=Bold";  // OpenSCAD font spec ("Family:style=Style")
+//arm_label_font       = "Mistral:style=Bold";  // OpenSCAD font spec ("Family:style=Style")
+//arm_label_font       = "Winter Wishes:style=Bold";  // OpenSCAD font spec ("Family:style=Style")
+//arm_label_font       = "Forte:style=Bold";  // OpenSCAD font spec ("Family:style=Style")
+arm_label_font       = "Comic Sans MS:style=Bold";  // OpenSCAD font spec ("Family:style=Style")
+
+// Per-line text alignment. halign: "left" | "center" | "right".
+// valign: "top" | "center" | "baseline" | "bottom". Each line is positioned
+// independently relative to its own line center; useful for stacking lines of
+// different lengths neatly (e.g., both "left" so they share a left edge).
+arm_label_line_1_halign = "center";
+arm_label_line_1_valign = "center";
+arm_label_line_2_halign = "center";
+arm_label_line_2_valign = "center";
+
 // Rail base: rectangular box at the bottom of the body with a through-hole
 // along the X axis. The fixed rail slides through the hole; the entire arm
 // translates along the rail in X. The rail runs parallel to the retainer
@@ -859,6 +887,36 @@ module side_screw_subtraction() {
             cylinder(d = side_pin_shaft_hole_d, h = L_shaft);
 }
 
+// Arm label engrave: text indented into the top of the rail base, inside the
+// body cavity. Floor is at z = rail_base_top_z (= -lower_height); subtraction
+// extrudes downward by arm_label_depth, with eps overshoot above the floor
+// (overshoot lives inside the cavity void, so no body material is removed).
+// Readable from above (-Z view).
+module arm_label_subtraction() {
+    if (render_arm_label && (len(arm_label_line_1) > 0 || len(arm_label_line_2) > 0)) {
+        translate([arm_label_x_center, arm_label_y_center,
+                   rail_base_top_z - arm_label_depth])
+            linear_extrude(height = arm_label_depth + eps)
+                rotate([0, 0, arm_label_angle])
+                    mirror([arm_label_mirror ? 1 : 0, 0, 0]) {
+                        if (len(arm_label_line_1) > 0)
+                            translate([0, arm_label_line_spacing / 2, 0])
+                                text(arm_label_line_1,
+                                     size   = arm_label_size,
+                                     font   = arm_label_font,
+                                     halign = arm_label_line_1_halign,
+                                     valign = arm_label_line_1_valign);
+                        if (len(arm_label_line_2) > 0)
+                            translate([0, -arm_label_line_spacing / 2, 0])
+                                text(arm_label_line_2,
+                                     size   = arm_label_size,
+                                     font   = arm_label_font,
+                                     halign = arm_label_line_2_halign,
+                                     valign = arm_label_line_2_valign);
+                    }
+    }
+}
+
 //==============================================================================
 // 9. TOP-LEVEL LONG ARM PIECE
 //==============================================================================
@@ -888,6 +946,7 @@ module long_arm() {
         screw_plate_holes();
         side_nut_nook_subtraction();
         side_screw_subtraction();
+        arm_label_subtraction();
     }
 }
 
