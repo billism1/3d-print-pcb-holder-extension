@@ -2,6 +2,8 @@
 
 An OpenSCAD-designed extension for standard PCB holders that enables mounting wider/longer PCBs that exceed the original holder's capacity.
 
+![Extension (right) and full replacement arm (left) on shared base rail](images/extension_and_replacement_01.png)
+
 ## Target Holders
 
 This extension is designed for standard PCB holders with ~200×140mm max capacity:
