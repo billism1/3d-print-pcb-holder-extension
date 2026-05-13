@@ -57,7 +57,7 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 **Locking the arm in place:** The long arm uses a **rail-lock pin** to lock its position on the rail. This pin presses against the rail from the side, securing the arm without relying on the hand screw at the bottom (which adjusts clamping force on the PCB). Insert the pin into the hole on the side of the arm and tighten to lock; remove or loosen it to slide the arm along the rail.
 
-> **Rail-lock pin:** A replacement pin (`rail-lock-pin.scad` / `rail-lock-pin.stl`) is included in this repo in case the original pin is lost or worn out.
+> **Rail-lock pin:** A replacement pin ([`rail-lock-pin.scad`](src/rail-lock-pin.scad) / `rail-lock-pin.stl`) is included in this repo in case the original pin is lost or worn out.
 
 ### Measured Arm Dimensions
 
@@ -70,10 +70,13 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 ## Repository Layout
 
-- `src/pcb-holder-extension.scad`  
-  Parametric OpenSCAD source for the extension. Modify the variables at the top of the file to match your specific holder.
+- [`src/pcb-holder-extension.scad`](src/pcb-holder-extension.scad)  
+  Parametric OpenSCAD source for the cap-on extension. Modify the variables at the top of the file to match your specific holder.
 
-- `src/rail-lock-pin.scad`  
+- [`src/pcb-holder-long-arm.scad`](src/pcb-holder-long-arm.scad)  
+  Parametric OpenSCAD source for the full arm replacement. Modify the variables at the top of the file to match your specific holder and rail.
+
+- [`src/rail-lock-pin.scad`](src/rail-lock-pin.scad)  
   Replacement rail-lock pin for the long arm. Print this if the original pin is lost or worn; it's the pin that presses against the base rail to lock the arm's position.
 
 - `publication/`  
@@ -85,7 +88,7 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 ### Shared (both files)
 
-Set these to match your physical PCB holder hardware. Both `src/pcb-holder-extension.scad` and `src/pcb-holder-long-arm.scad` have these parameters.
+Set these to match your physical PCB holder hardware. Both [`src/pcb-holder-extension.scad`](src/pcb-holder-extension.scad) and [`src/pcb-holder-long-arm.scad`](src/pcb-holder-long-arm.scad) have these parameters.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -99,7 +102,7 @@ Set these to match your physical PCB holder hardware. Both `src/pcb-holder-exten
 | `top_bolt_offset_from_top` | 12 mm | Top bolt hole center, measured down from the top of the piece |
 | `bolt_clearance` | 0.35 mm | Oversize on bolt through-holes |
 
-### Extension-specific (`pcb-holder-extension.scad`)
+### Extension-specific ([`pcb-holder-extension.scad`](src/pcb-holder-extension.scad))
 
 Arm dimensions are measured from your original holder arm. Cap geometry controls the added height.
 
@@ -114,7 +117,7 @@ Arm dimensions are measured from your original holder arm. Cap geometry controls
 | `surface_tolerance` | 0.0 mm | Per-side clearance between sleeve cavity and arm |
 | `boss_recess_clearance` | −0.45 mm | Clearance on the boss recess (negative = interference; tune for snug fit) |
 
-### Long arm-specific (`pcb-holder-long-arm.scad`)
+### Long arm-specific ([`pcb-holder-long-arm.scad`](src/pcb-holder-long-arm.scad))
 
 Body cross-section and rail parameters for the replacement arm.
 
