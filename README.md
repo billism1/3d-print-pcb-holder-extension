@@ -74,7 +74,7 @@ Slides onto the base rail from **either side** as a drop-in replacement:
   Parametric OpenSCAD source for the extension. Modify the variables at the top of the file to match your specific holder.
 
 - `src/rail-lock-pin.scad`  
-  Replacement rail-lock pin for the long arm. Print this if the original pin is lost or worn — it's the pin that presses against the base rail to lock the arm's position.
+  Replacement rail-lock pin for the long arm. Print this if the original pin is lost or worn; it's the pin that presses against the base rail to lock the arm's position.
 
 - `publication/`  
   Platform-specific release folders.
@@ -141,7 +141,7 @@ Body cross-section and rail parameters for the replacement arm.
 - **Extension:** caps onto existing arms on both sides; no disassembly required
 - **Long arm:** full arm replacement; slides onto the base rail from either side
 - Both maintain compatibility with the spring-loaded brace mechanism
-- Parametric OpenSCAD design — adjust dimensions to match your holder
+- Parametric OpenSCAD design; adjust dimensions to match your holder
 - FDM-optimized with proper tolerances
 
 ## Suggested Workflow
