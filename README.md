@@ -31,15 +31,29 @@ However, they have size limitations. When PCBs exceed these limits, rotation bec
 
 ## Solution
 
-This extension mounts on **both sides** of the vertical holders, effectively widening the usable area to accommodate larger PCBs that need to be rotated during assembly or testing.
+Two approaches are available; choose one:
 
-### Mounting Method
+- **`pcb-holder-extension:`** Caps onto the top of each existing vertical arm, adding height above the original. One piece per side.
+- **`pcb-holder-long-arm:`** A full replacement for the entire vertical arm, providing a taller profile without modifying the base.
 
-The extension pieces:
-1. **Slide through** the retainer-help bolt hole from inside to outside
-2. **Secure with a bolt and nut** through the extension
-3. **Extend vertically** above the original arm (height is a parameter)
-4. Only one piece needed - **mirror** for the other side
+Either way, the hardware from the original holder is reused.
+
+### Mounting Method: Extension
+
+Mounts on **both sides** of the holder (one piece per arm):
+
+1. Slide the extension cap over the top of the existing vertical arm.
+2. Thread the retainer bolt through the bolt hole from inside to outside.
+3. Secure with the original bolt and nut.
+
+### Mounting Method: Long Arm (Replacement)
+
+Slides onto the base rail from **either side** as a drop-in replacement:
+
+1. Slide the original vertical arm off the base rail.
+2. Remove the hand screw.
+3. Slide the replacement arm onto the rail from either side.
+4. Reuse the original hand screw and hardware to secure.
 
 ### Measured Arm Dimensions
 
