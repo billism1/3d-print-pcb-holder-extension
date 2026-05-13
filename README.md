@@ -1,6 +1,6 @@
 # PCB Holder Extension
 
-An OpenSCAD-designed extension for standard PCB holders that enables mounting wider/longer PCBs that exceed the original holder's capacity.
+Two OpenSCAD-designed solutions for mounting wider/longer PCBs that exceed a standard PCB holder's capacity: a cap-on extension and a full arm replacement.
 
 ![Extension (right) and full replacement arm (left) on shared base rail](images/extension_and_replacement_01.png)
 
@@ -83,7 +83,7 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 ## Customization Parameters
 
-Edit the top of `src/pcb-holder-extension.scad` to match your holder.
+Parameters below are for `src/pcb-holder-extension.scad` (the cap-on extension). The long arm (`src/pcb-holder-long-arm.scad`) has its own parameters at the top of that file.
 
 ### Target arm (measured)
 
@@ -119,7 +119,7 @@ Edit the top of `src/pcb-holder-extension.scad` to match your holder.
 
 ## Design Specifications
 
-- **Material**: PETG or PLA (PETG recommended for durability)
+- **Material**: PLA+, PCTG, PETG, ABS, ASA, or similar (tested with PLA+ and PCTG. Both showed no signs of weakness and either should be plenty strong for most users)
 - **Layer height**: 0.2 mm
 - **Infill**: 20-25%
 - **Supports**: May be required depending on orientation
@@ -127,9 +127,10 @@ Edit the top of `src/pcb-holder-extension.scad` to match your holder.
 
 ## Key Features
 
-- Mounts to both sides of vertical PCB holder posts
-- Maintains compatibility with spring-loaded brace mechanism
-- Parametric design for customization
+- **Extension:** caps onto existing arms on both sides; no disassembly required
+- **Long arm:** full arm replacement; slides onto the base rail from either side
+- Both maintain compatibility with the spring-loaded brace mechanism
+- Parametric OpenSCAD design — adjust dimensions to match your holder
 - FDM-optimized with proper tolerances
 
 ## Suggested Workflow
@@ -137,5 +138,5 @@ Edit the top of `src/pcb-holder-extension.scad` to match your holder.
 1. Customize dimensions in OpenSCAD for your specific holder.
 2. Export to STL for your slicer.
 3. Print with appropriate settings for your material.
-4. Mount extension pieces to both sides of holder posts.
+4. Mount: slide extension caps onto both arms, or swap in the long arm replacement on each side.
 5. Test fit with your largest PCB before rotation.
