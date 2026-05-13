@@ -38,14 +38,20 @@ Two approaches are available; choose one:
 
 Either way, the hardware from the original holder is reused.
 
+## Hardware Assembly (Applies to Both Methods)
+
+Both the extension and long arm replacement reuse the original holder's hardware. Follow these steps for either mounting method:
+
+1. Slide the PCB grip bolt (reused from the original holder) through the bolt hole from inside to outside.
+2. Place the washer (from the original holder) onto the bolt on the outside.
+3. Press the retainer clip (from the original holder) onto the washer to lock it in place. The washer keeps the PCB grip bolt from sliding out, while the grip on the inner side prevents it from going in.
+
 ### Mounting Method: Extension
 
 Mounts on **both sides** of the holder (one piece per arm):
 
 1. Slide the extension cap over the top of the existing vertical arm.
-2. Slide the PCB grip bolt (reused from the original holder) through the bolt hole from inside to outside.
-3. Place the washer (from the original holder) onto the bolt on the outside.
-4. Press the retainer clip (from the original holder) onto the washer to lock it in place. The washer keeps the PCB grip bolt from sliding out, while the grip on the inner side prevents it from going through.
+2. Follow the hardware assembly steps above.
 
 ### Mounting Method: Long Arm (Replacement)
 
@@ -55,6 +61,7 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 2. Remove the hand screw.
 3. Slide the replacement arm onto the rail from either side.
 4. Reuse the original hand screw and hardware to secure.
+5. Follow the hardware assembly steps above.
 
 **Locking the arm in place:** The long arm uses a **rail-lock pin** to lock its position on the rail. This pin presses against the rail from the side, securing the arm without relying on the hand [...]
 
