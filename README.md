@@ -83,39 +83,50 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 ## Customization Parameters
 
-Parameters below are for `src/pcb-holder-extension.scad` (the cap-on extension). The long arm (`src/pcb-holder-long-arm.scad`) has its own parameters at the top of that file.
+### Shared (both files)
 
-### Target arm (measured)
+Set these to match your physical PCB holder hardware. Both `src/pcb-holder-extension.scad` and `src/pcb-holder-long-arm.scad` have these parameters.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `arm_x_bottom` / `arm_x_top` | 24 / 16 mm | Arm width (front view, retainer-bolt axis) |
-| `arm_y_bottom` / `arm_y_top` | 30 / 20 mm | Arm depth (side view, hand-screw axis) |
-| `arm_height` | 80 mm | Total height of the vertical arm |
-| `retainer_bolt_hole_d` | 4 mm | Diameter of the retainer bolt hole |
-| `retainer_bolt_z_from_bottom` | 65 mm | Bolt-hole center, measured from arm bottom |
-| `retainer_boss_od` | 15.8 mm | OD of the boss around the bolt hole on the inner face |
-| `retainer_boss_protrude` | 4 mm | How far the boss sticks toward the PCB |
-| `hand_screw_thread_d` | 3.85 mm | Hand-screw thread OD (M4-ish) |
+| `retainer_bolt_hole_d` | 5 mm | Diameter of the retainer bolt hole |
+| `retainer_boss_od` | 16.5 mm | OD of the boss around the bolt hole on the arm's inner face |
+| `retainer_boss_protrude` | 3.5 mm | How far the boss protrudes toward the PCB |
+| `hand_screw_thread_d` | 3.85–4 mm | Hand-screw thread OD (M4-ish; 3.85 in extension, 4 in long arm) |
 | `hand_screw_nut_af` | 7 mm | Hex nut across-flats (M4) |
+| `wall_thickness` | 3 mm | Wall thickness throughout |
+| `wall_x_trim` | 3.5 mm | Body width reduction on the open (+X) side |
+| `top_bolt_offset_from_top` | 12 mm | Top bolt hole center, measured down from the top of the piece |
+| `bolt_clearance` | 0.35 mm | Oversize on bolt through-holes |
 
-### Extension shape
+### Extension-specific (`pcb-holder-extension.scad`)
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `extension_height` | 40 mm | Extra height above the original arm |
-| `sleeve_depth` | 25 mm | How far the sleeve covers the arm from the top |
-| `wall_thickness` | 3 mm | Wall thickness of the C-channel and top cap |
-| `top_bolt_offset_from_top` | 15 mm | Mirrors the original arm: top bolt this far below extension top |
-
-### FDM tolerances
+Arm dimensions are measured from your original holder arm. Cap geometry controls the added height.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `surface_tolerance` | 0.2 mm | Per-side clearance between sleeve cavity and arm |
-| `bolt_clearance` | 0.3 mm | Oversize for bolt through-holes |
-| `boss_recess_clearance` | 0.4 mm | Slip-fit clearance over the arm's boss |
-| `nut_pocket_depth` | 3 mm | Depth of hex nut pockets |
+| `arm_x_bottom` / `arm_x_top` | 23.5 / 16 mm | Arm width in X at bottom / top (front view, retainer-bolt axis) |
+| `arm_y_bottom` / `arm_y_top` | 30 / 20 mm | Arm depth in Y at bottom / top (side view, hand-screw axis) |
+| `arm_height` | 80 mm | Total height of the original vertical arm |
+| `retainer_bolt_z_from_bottom` | 65 mm | Bolt-hole center, measured from the arm bottom |
+| `extension_height` | 80 mm | Extra height added above the original arm top |
+| `sleeve_depth` | 84 mm | How far the sleeve covers the arm from the top |
+| `surface_tolerance` | 0.0 mm | Per-side clearance between sleeve cavity and arm |
+| `boss_recess_clearance` | −0.45 mm | Clearance on the boss recess (negative = interference; tune for snug fit) |
+
+### Long arm-specific (`pcb-holder-long-arm.scad`)
+
+Body cross-section and rail parameters for the replacement arm.
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `body_x_bottom` / `body_x_top` | 29.9 / 18.5 mm | Outer body X width at bottom / top |
+| `body_y_bottom` / `body_y_top` | 31.3 / 20 mm | Outer body Y depth at bottom / top |
+| `lower_height` | 84 mm | Body length below the bracket attachment point |
+| `upper_height` | 80 mm | Body length above the bracket attachment point |
+| `rail_y` / `rail_z` | 30 / 15 mm | Rail cross-section dimensions |
+| `rail_clearance` | 0.2 mm | Per-side slip-fit clearance around the rail |
+| `rail_base_x` | 40 mm | Rail base grip length along the rail |
 
 ## Design Specifications
 
