@@ -55,6 +55,10 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 3. Slide the replacement arm onto the rail from either side.
 4. Reuse the original hand screw and hardware to secure.
 
+**Locking the arm in place:** The long arm uses a **rail-lock pin** to lock its position on the rail. This pin presses against the rail from the side, securing the arm without relying on the hand screw at the bottom (which adjusts clamping force on the PCB). Insert the pin into the hole on the side of the arm and tighten to lock; remove or loosen it to slide the arm along the rail.
+
+> **Rail-lock pin:** A replacement pin (`rail-lock-pin.scad` / `rail-lock-pin.stl`) is included in this repo in case the original pin is lost or worn out.
+
 ### Measured Arm Dimensions
 
 | View | Bottom | Top |
@@ -68,6 +72,9 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 - `src/pcb-holder-extension.scad`  
   Parametric OpenSCAD source for the extension. Modify the variables at the top of the file to match your specific holder.
+
+- `src/rail-lock-pin.scad`  
+  Replacement rail-lock pin for the long arm. Print this if the original pin is lost or worn — it's the pin that presses against the base rail to lock the arm's position.
 
 - `publication/`  
   Platform-specific release folders.
