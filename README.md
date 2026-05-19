@@ -133,8 +133,7 @@ Body cross-section and rail parameters for the replacement arm.
 |-----------|---------|-------------|
 | `body_x_bottom` / `body_x_top` | 29.9 / 18.5 mm | Outer body X width at bottom / top |
 | `body_y_bottom` / `body_y_top` | 31.3 / 20 mm | Outer body Y depth at bottom / top |
-| `lower_height` | 84 mm | Body length below the bracket attachment point |
-| `upper_height` | 80 mm | Body length above the bracket attachment point |
+| `body_height` | 164 mm | Total height of the tapered body (rail base up to top cap) |
 | `rail_y` / `rail_z` | 30 / 15 mm | Rail cross-section dimensions |
 | `rail_clearance` | 0.2 mm | Per-side slip-fit clearance around the rail |
 | `rail_base_x` | 40 mm | Rail base grip length along the rail |

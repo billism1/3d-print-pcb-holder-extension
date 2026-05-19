@@ -17,11 +17,11 @@
 //   -X = inner side  — closed wall; faces PCB center; carries top boss
 //   +Y = front       — closed wall; carries hand-screw through-hole
 //   -Y = back        — closed wall; carries hand-screw nut pocket
-//   +Z = up          — internally, Z = 0 sits at the "shoulder" plane where
-//                      the top boss, upper bolt, and hand-screw hardware
-//                      attach. The final long_arm() output is lifted so the
-//                      bottom of the rail base rests on the Z = 0 plane
-//                      (ready to drop straight onto a printer bed).
+//   +Z = up          — internally, Z = 0 sits at the bottom of the tapered
+//                      body, where it meets the top of the rail base. The
+//                      final long_arm() output is lifted so the bottom of
+//                      the rail base rests on the Z = 0 plane (ready to
+//                      drop straight onto a printer bed).
 //==============================================================================
 
 //==============================================================================
@@ -45,23 +45,20 @@ hand_screw_nut_thick = 3.0;   // mm - M4 hex nut typical axial thickness
 // 2. BODY DIMENSIONS
 //==============================================================================
 
-// The body is a tapered tube split at Z = 0 (the "shoulder" plane where the
-// top boss, upper bolt hole, and hand-screw nut attach). Below the shoulder
-// the body runs down to the rail base; above the shoulder it rises to a
-// closed top cap. Cross-section tapers linearly across the entire height
-// (no kink at the shoulder).
+// The body is a single tapered tube running from the rail base at the
+// bottom (Z = 0) up to a closed top cap (Z = body_height). The
+// cross-section tapers linearly across the full height.
 
-// Body OUTER cross-section at the BOTTOM (Z = -lower_height)
+// Body OUTER cross-section at the BOTTOM (Z = 0)
 body_x_bottom = 29.875;   // mm - X width  (left-right, retainer bolt axis)
 body_y_bottom = 31.25;    // mm - Y depth  (front-to-back, hand screw axis)
 
-// Body OUTER cross-section at the TOP (Z = upper_height)
+// Body OUTER cross-section at the TOP (Z = body_height)
 body_x_top    = 18.5;     // mm
 body_y_top    = 20;     // mm
 
-// Section heights, split at Z = 0
-lower_height = 84;   // mm - body extent below the shoulder (down to rail base)
-upper_height = 80;   // mm - body extent above the shoulder (up to top cap)
+// Total body height: tapered tube from the rail base up to the top cap
+body_height = 164;   // mm
 
 wall_thickness = 3;  // mm
 
@@ -241,36 +238,26 @@ $fs = 0.4;
 // 5. DERIVED DIMENSIONS
 //==============================================================================
 
-// Total taper distance, used to interpolate cross-section at any Z.
-total_height = lower_height + upper_height;
-
-// Outer body cross-section at any absolute Z, by linear interpolation
-// between the bottom (Z = -lower_height) and top (Z = upper_height).
+// Outer body cross-section at any Z, by linear interpolation between the
+// bottom (Z = 0) and the top (Z = body_height).
 function body_outer_x_at(z) =
-    body_x_bottom + (body_x_top - body_x_bottom) * (z + lower_height) / total_height;
+    body_x_bottom + (body_x_top - body_x_bottom) * z / body_height;
 function body_outer_y_at(z) =
-    body_y_bottom + (body_y_top - body_y_bottom) * (z + lower_height) / total_height;
+    body_y_bottom + (body_y_top - body_y_bottom) * z / body_height;
 
 // Cavity = outer minus a wall on each side.
 function cavity_x_at(z) = body_outer_x_at(z) - 2 * wall_thickness;
 function cavity_y_at(z) = body_outer_y_at(z) - 2 * wall_thickness;
 
-// Outer dimensions at the shoulder seam (Z = 0)
-outer_x_at_seam = body_outer_x_at(0);
-outer_y_at_seam = body_outer_y_at(0);
-
-// Cavity dimensions at bottom and seam (used by the cavity tapered-box cuts)
-cavity_x_at_bottom = cavity_x_at(-lower_height);
-cavity_y_at_bottom = cavity_y_at(-lower_height);
-cavity_x_at_seam   = cavity_x_at(0);
-cavity_y_at_seam   = cavity_y_at(0);
+// Cavity dimensions at the bottom (used by the cavity tapered-box cut)
+cavity_y_at_bottom = cavity_y_at(0);
 
 // Upper bolt hole Z, measured down from the top of the body
-upper_bolt_z = upper_height - top_bolt_offset_from_top;
+upper_bolt_z = body_height - top_bolt_offset_from_top;
 
-// Upper-section cavity stops wall_thickness below the top to leave a solid
-// roof. cap_inner_x/y are the cavity inner dimensions at that capped height.
-cavity_top_z = upper_height - wall_thickness;
+// Cavity stops wall_thickness below the top to leave a solid roof.
+// cap_inner_x/y are the cavity inner dimensions at that capped height.
+cavity_top_z = body_height - wall_thickness;
 cap_inner_x  = cavity_x_at(cavity_top_z);
 cap_inner_y  = cavity_y_at(cavity_top_z);
 
@@ -295,8 +282,8 @@ rail_cavity_z     = rail_z + 2 * rail_clearance;
 rail_base_outer_y = rail_cavity_y + 2 * wall_thickness;
 rail_base_outer_z = rail_cavity_z + 2 * wall_thickness;
 
-// Top of the rail base meets the bottom of the body at Z = -lower_height.
-rail_base_top_z    = -lower_height;
+// Top of the rail base meets the bottom of the body at Z = 0.
+rail_base_top_z    = 0;
 rail_base_bot_z    = rail_base_top_z - rail_base_outer_z;
 rail_base_center_z = (rail_base_top_z + rail_base_bot_z) / 2;
 
@@ -441,47 +428,27 @@ module hex_pocket(af, depth) {
 // 7. COMPONENT MODULES
 //==============================================================================
 
-// Lower body: the section from Z = -lower_height up to the shoulder (Z = 0).
-// Outer is a tapered C-channel open on +X (three walls: -X, +Y, -Y).
-// Cavity merges with the upper body cavity at Z = 0 (no horizontal seam).
-module lower_body() {
+// Body: the single tapered C-channel from the rail base (Z = 0) up to the
+// top cap (Z = body_height). Outer is open on +X (three walls: -X, +Y, -Y);
+// a solid top cap of wall_thickness seals the top. The cavity is open at
+// the bottom so it merges into the rail base interior.
+module body() {
     difference() {
         // Outer trimmed by wall_x_trim on the +X side (the open side).
         // Width is reduced and the body shifted -X by half the trim, keeping
-        // the -X wall position unchanged. -X vertical edges are rounded.
+        // the -X wall position unchanged. -X vertical edges are rounded;
+        // top edges chamfered.
         translate([-wall_x_trim / 2, 0, 0])
             rounded_tapered_body(body_x_bottom - wall_x_trim, body_y_bottom,
-                                 outer_x_at_seam - wall_x_trim, outer_y_at_seam,
-                                 -lower_height, 0,
-                                 edge_corner_radius);
+                                 body_x_top - wall_x_trim, body_y_top,
+                                 0, body_height,
+                                 edge_corner_radius, top_corner_radius);
         // Cavity, shifted +X by wall_thickness so it punches the +X wall
         // entirely while leaving the -X wall intact at full thickness.
-        // Open all the way up to Z = 0 so it merges with the upper body
-        // cavity (no horizontal ceiling at the seam).
+        // Open at the bottom (merges into the rail base interior); sealed
+        // at the top by wall_thickness.
         translate([wall_thickness, 0, 0])
             tapered_box(body_x_bottom, cavity_y_at_bottom,
-                        outer_x_at_seam, cavity_y_at_seam,
-                        -lower_height - eps, eps);
-    }
-}
-
-// Upper body: the section from the shoulder (Z = 0) up to the top cap
-// (Z = upper_height). Same open-on-+X channel as the lower body. Walls
-// remain on -X, +Y, -Y, plus a solid top cap of wall_thickness sealing
-// the top.
-module upper_body() {
-    difference() {
-        // Outer trimmed by wall_x_trim on the +X side (the open side).
-        // Same trim+shift pattern as lower_body, preserving -X wall position.
-        // -X vertical edges rounded; top edges chamfered.
-        translate([-wall_x_trim / 2, 0, 0])
-            rounded_tapered_body(outer_x_at_seam - wall_x_trim, outer_y_at_seam,
-                                 body_x_top - wall_x_trim, body_y_top,
-                                 0, upper_height,
-                                 edge_corner_radius, top_corner_radius);
-        // Cavity, open on +X, sealed at the top by wall_thickness.
-        translate([wall_thickness, 0, 0])
-            tapered_box(outer_x_at_seam, cavity_y_at_seam,
                         cap_inner_x + 2 * wall_thickness, cap_inner_y,
                         0 - eps, cavity_top_z);
     }
@@ -583,7 +550,7 @@ module top_boss_inlet() {
 // Rail base: rectangular box at the bottom of the arm. A rectangular rail
 // (rail_y x rail_z cross-section) slides through it along the X axis, so
 // the entire arm translates along the rail. Top of the base meets the
-// bottom of the body at Z = -lower_height. Centered on Y = 0 (rail/bolt
+// bottom of the body at Z = 0. Centered on Y = 0 (rail/bolt
 // axis); centered in X on the body's outer center (-wall_x_trim/2).
 module rail_base() {
     bx = rail_base_x;
@@ -697,7 +664,7 @@ module side_nut_holder() {
 // Upper bolt hole: through the top boss, the upper body, AND the inside
 // cylindrical boss on the cavity side. The inside boss's +X tip can reach
 // further out than the body's +X face once the upper body has tapered narrow
-// (large upper_height), so the far end is taken as the max of the two.
+// (large body_height), so the far end is taken as the max of the two.
 module upper_bolt_hole() {
     x_outer_half = body_outer_x_at(upper_bolt_z) / 2;
     inside_boss_tip_x = -cavity_x_at_ub / 2 + inside_boss_length;
@@ -714,11 +681,10 @@ module upper_bolt_hole() {
 // cylindrical boss. Stops just past the bolt axis so the screw tip presses
 // on the retainer bolt. Does NOT punch through to +Y — blind on +Y side.
 //
-// Start uses the worst-case -Y face position (at the shoulder Z = 0, where
-// the body is widest in this section) so the hole punches cleanly at every
-// Z within its vertical range despite the upper-body taper.
+// Start uses the body's widest -Y face position (the bottom, Z = 0) so the
+// hole punches cleanly despite the body taper.
 module hand_screw_subtractions() {
-    start_y = -outer_y_at_seam / 2 - eps;
+    start_y = -body_y_bottom / 2 - eps;
     end_y   = hand_screw_blind_overshoot;
     translate([0, start_y, upper_bolt_z])
         rotate([-90, 0, 0])
@@ -740,7 +706,7 @@ module nut_nook_subtraction() {
     // Slot extends from -nx/2 (deepest into block) to well past the +X face
     // of the body so it is fully open on +X.
     slot_x_min = -nx / 2;
-    slot_x_far = outer_x_at_seam / 2 + 20;
+    slot_x_far = body_x_bottom / 2 + 20;
     slot_x_size  = slot_x_far - slot_x_min;
     slot_x_center = (slot_x_min + slot_x_far) / 2;
 
@@ -888,7 +854,7 @@ module side_screw_subtraction() {
 }
 
 // Arm label engrave: text indented into the top of the rail base, inside the
-// body cavity. Floor is at z = rail_base_top_z (= -lower_height); subtraction
+// body cavity. Floor is at z = rail_base_top_z (= 0); subtraction
 // extrudes downward by arm_label_depth, with eps overshoot above the floor
 // (overshoot lives inside the cavity void, so no body material is removed).
 // Readable from above (-Z view).
@@ -923,11 +889,10 @@ module arm_label_subtraction() {
 
 module long_arm() {
     // Lift so the bottom of the rail base sits at Z = 0.
-    translate([0, 0, lower_height + rail_base_outer_z])
+    translate([0, 0, rail_base_outer_z])
     difference() {
         union() {
-            lower_body();
-            upper_body();
+            body();
             top_boss_supported();
             // Inside cluster (cyl boss + nut holder) with self-supporting
             // taper. Hull blends the boss into the rectangular block and
