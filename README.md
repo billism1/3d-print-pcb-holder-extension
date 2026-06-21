@@ -21,22 +21,16 @@ This extension is designed for standard PCB holders with ~200×140mm max capacit
 - **Weight**: 450g
 - **Features**: 4 slots for varying PCB thicknesses, non-slip rubber pads, 360° rotation
 
-## Problem
+## Why
 
-Standard PCB holders (like the Noah model above) allow:
-- Horizontal expansion left and right
-- Rotation of PCBs in spring-loaded braces
+Standard PCB holders adjust horizontally and rotate PCBs in spring-loaded braces. Oversized PCBs can't rotate, though — they hit the holder frame. These parts add arm height so larger boards clear it.
 
-However, they have size limitations. When PCBs exceed these limits, rotation becomes impossible because the PCB hits the holder's frame.
-
-## Solution
-
-Two approaches are available; choose one:
+Two approaches; choose one:
 
 - **`pcb-holder-extension:`** Caps onto the top of each existing vertical arm, adding height above the original. One piece per side.
-- **`pcb-holder-long-arm:`** A full replacement for the entire vertical arm, providing a taller profile without modifying the base.
+- **`pcb-holder-long-arm:`** Full replacement for the vertical arm. Taller profile, no base modification.
 
-Either way, the hardware from the original holder is reused.
+Either way, reuse the original holder's hardware.
 
 ## Hardware Assembly (Applies to Both Methods)
 
@@ -78,19 +72,25 @@ Slides onto the base rail from **either side** as a drop-in replacement:
 
 ## Repository Layout
 
-- [`src/pcb-holder-extension.scad`](src/pcb-holder-extension.scad)  
-   Parametric OpenSCAD source for the cap-on extension. Modify the variables at the top of the file to match your specific holder.
+### Source ([`src/`](src/)) — parametric OpenSCAD
 
-- [`src/pcb-holder-long-arm.scad`](src/pcb-holder-long-arm.scad)  
-   Parametric OpenSCAD source for the full arm replacement. Modify the variables at the top of the file to match your specific holder and rail.
+Edit the variables at the top of each file to match your holder, then export your own STL.
 
-- [`src/rail-lock-pin.scad`](src/rail-lock-pin.scad)  
-   Replacement rail-lock pin for the long arm. Print this if the original pin is lost or worn out. The pin sits between the hand-tightened screw and the rail; when the screw is tightened, it presses the pin against the rail to lock the arm's position. When installing the replacement pin using the existing hardware, carefully position the pin in place before securing the hand-tightened screw.
+- [`src/pcb-holder-extension.scad`](src/pcb-holder-extension.scad) — cap-on extension.
+- [`src/pcb-holder-long-arm.scad`](src/pcb-holder-long-arm.scad) — full arm replacement.
+- [`src/rail-lock-pin.scad`](src/rail-lock-pin.scad) — replacement rail-lock pin for the long arm.
 
-- `publication/`  
-   Platform-specific release folders.
-   - In derived repos, create one subfolder per destination platform.
-   - Examples: `publication/MakerWorld/`, `publication/Printables/`.
+### Ready-to-print files ([`publication/`](publication/))
+
+Download these directly if the defaults fit a standard ~200×140mm holder (Noah NH-11E / Pro's Kit SN-390):
+
+| File | What it is |
+|------|------------|
+| [`pcb-holder-extension.stl`](publication/pcb-holder-extension.stl) | Cap-on extension. Print **two** (one per arm). |
+| [`pcb-holder-long-arm_140mm.stl`](publication/pcb-holder-long-arm_140mm.stl) | Full replacement arm, 140 mm tall. Print **two**. |
+| [`pcb-holder-long-arm_164mm.stl`](publication/pcb-holder-long-arm_164mm.stl) | Full replacement arm, taller 164 mm variant for more reach. Print **two**. |
+| [`rail-lock-pin.stl`](publication/rail-lock-pin.stl) | Replacement rail-lock pin for the long arm. Print only if the original pin is lost or worn. |
+| [`pcb-holder-extension.3mf`](publication/pcb-holder-extension.3mf) | Pre-arranged 3MF project of the extension (open in your slicer). |
 
 ## Customization Parameters
 

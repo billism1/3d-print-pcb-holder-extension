@@ -1,14 +1,11 @@
 # Publication Files
 
-This folder is for files prepared for publishing and listing on sharing/printing platforms.
+Ready-to-print exports of the designs in [`../src/`](../src/). Tuned for standard ~200×140mm holders (Noah NH-11E / Pro's Kit SN-390).
 
-In repos created from this template, create one subfolder per destination site (for example: MakerWorld, Printables, Thingiverse, etc.).
-
-## Purpose
-- Organize release-ready assets by publishing destination.
-- Keep platform-specific metadata, screenshots, and packaged files grouped together.
-
-## In derived repos
-- Add a folder for each publishing destination under this directory.
-- Store platform-specific text, images, links, and upload bundles in that destination folder.
-- Keep publication assets separate from editable source project files in `src`.
+| File | What it is |
+|------|------------|
+| `pcb-holder-extension.stl` | Cap-on extension. Print two (one per arm). |
+| `pcb-holder-long-arm_140mm.stl` | Full replacement arm, 140 mm tall. Print two. |
+| `pcb-holder-long-arm_164mm.stl` | Full replacement arm, taller 164 mm variant. Print two. |
+| `rail-lock-pin.stl` | Replacement rail-lock pin for the long arm. Print only if the original is lost or worn. |
+| `pcb-holder-extension.3mf` | Pre-arranged 3MF project of the extension; open in your slicer. |
