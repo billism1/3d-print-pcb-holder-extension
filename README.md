@@ -2,6 +2,8 @@
 
 Two OpenSCAD-designed solutions for mounting wider/longer PCBs that exceed a standard PCB holder's capacity: a cap-on extension and a full arm replacement.
 
+> **📥 Download & print on MakerWorld:** [PCB Holder Arm Extension & Replacement](https://makerworld.com/en/models/2961782-pcb-holder-arm-extension-replacement)
+
 ![Extension (right) and full replacement arm (left) on shared base rail](images/extension_and_replacement_01.png)
 
 ## Target Holders
