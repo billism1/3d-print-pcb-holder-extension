@@ -6,7 +6,7 @@ Two 3D-printable solutions for holding wider/taller PCBs that a standard PCB hol
 
 > **Source & Documentation:** Full OpenSCAD source, photos, and documentation: [github.com/billism1/3d-print-pcb-holder-extension](https://github.com/billism1/3d-print-pcb-holder-extension)
 
-This one's my dad's fault. He designs and works on PCBs that are bigger than these standard holders can deal with. The spring-loaded braces grab the board fine, but the moment he tries to rotate it, the board smacks straight into the holder's own frame. So he asked me, very casually, if I could maybe make some kind of little extension for the arms. The fix is conceptually simple: just *more arm*, lifting the grip point higher so a big board clears the frame as it spins.
+This one's my dad's fault. He designs and works on PCBs bigger than these standard holders can handle. The spring-loaded braces grab the board fine, but it's just too long or wide to flip. So he asked me, very casually, if I could maybe make some kind of little extension for the arms. The fix is conceptually simple: just *more arm*, lifting the grip point higher so a big board clears the frame as it spins.
 
 So I designed the snap-on extension. Done, right? Except then I had the thought every maker has had right before losing a weekend: "*...it really wouldn't be much more effort to just...*" And that's how the full arm replacement happened too. Turned out to be maybe 30% more effort, which my brain rounded down to "free". Now there are two solutions instead of one.
 
