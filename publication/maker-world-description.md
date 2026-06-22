@@ -6,9 +6,22 @@ Two 3D-printable solutions for holding wider/taller PCBs that a standard PCB hol
 
 > **Source & Documentation:** Full OpenSCAD source, photos, and documentation: [github.com/billism1/3d-print-pcb-holder-extension](https://github.com/billism1/3d-print-pcb-holder-extension)
 
-So I had a PCB that was a little too tall for my holder. The spring-loaded braces grab it fine, but the moment you try to rotate the board it smacks into the holder's own frame. Annoying. The fix is just *more arm* — lift the grip point higher so a big board clears the frame as it spins. I modeled the whole thing in OpenSCAD, every dimension parametric, then printed two ways of solving it because I couldn't decide which I liked better. Turns out both work, so you get both. If your holder is one of the common ~200×140mm ones, the included print files should drop right in. If it's something else, the source is on GitHub and every measurement is a variable at the top of the file.
+This one's my dad's fault. He designs and works on PCBs that are bigger than these standard holders can deal with. The spring-loaded braces grab the board fine, but the moment he tries to rotate it, the board smacks straight into the holder's own frame. So he asked me, very casually, if I could maybe make some kind of little extension for the arms. The fix is conceptually simple: just *more arm*, lifting the grip point higher so a big board clears the frame as it spins.
 
-## Two Approaches — Pick One
+So I designed the snap-on extension. Done, right? Except then I had the thought every maker has had right before losing a weekend: "*...it really wouldn't be much more effort to just...*" And that's how the full arm replacement happened too. Turned out to be maybe 30% more effort, which my brain rounded down to "free". Now there are two solutions instead of one.
+
+Full disclosure: I dabble in electronics, but I rarely touch PCBs big enough to actually need this. This was a Father's Day gift. And I'll be honest: when my dad came over for Father's Day this year (2026) and saw these, I'm fairly sure the parts got a warmer reception than the rest of us did. Which I completely understand and kind of expected, knowing my dad. A custom-fit arm for the exact holder that's been annoying you for months? *That* you don't see coming. No notes, Dad. Priorities respected.
+
+Both designs are built to **reuse all the original hardware from your holder's stock arms**, with nothing proprietary and no extra parts to source. Specifically, they reuse:
+
+- The **PCB grip bolt**
+- The **washer**
+- The **retainer clip**
+- The **hand screw** (and its **M4 hex nut**)
+
+If your holder is one of the common ~200×140mm ones, the included print files should drop right in. If it's something else, the OpenSCAD source is on GitHub and every measurement is a variable at the top of the file.
+
+## Two Approaches (Pick One)
 
 **Approach 1: Cap-On Extension**
 A C-shaped sleeve that slips down over the **top of your existing vertical arm** from the inner (PCB-facing) side. It reuses the original retainer bolt hole to lock on, and gives you an identical boss + captive-nut pocket at *its* top so the original spring-loaded PCB bracket and hand screw remount on the extension instead. No disassembly of the holder, no base modification. Print **two** (one per arm).
@@ -26,9 +39,9 @@ Either way, you reuse the holder's original hardware (grip bolt, washer, retaine
 | `pcb-holder-long-arm_140mm.stl` | Full replacement arm, 140 mm tall. Print **two**. |
 | `pcb-holder-long-arm_164mm.stl` | Full replacement arm, taller 164 mm variant for extra reach. Print **two**. |
 | `rail-lock-pin.stl` | Replacement rail-lock pin for the long arm. Print only if your original pin is lost or worn. |
-| `pcb-holder-extension.3mf` | Pre-arranged 3MF project of the extension — open straight in your slicer. |
+| `pcb-holder-extension.3mf` | Pre-arranged 3MF project of the extension. Open straight in your slicer. |
 
-Pick the extension **or** one of the two long-arm heights. The two long-arm files are just different reach amounts — print whichever clears your board.
+Pick the extension **or** one of the two long-arm heights. The two long-arm files are just different reach amounts, so print whichever clears your board.
 
 ## Compatibility
 
@@ -50,16 +63,16 @@ Retainer bolt hole ~4 mm diameter; boss protrudes ~4 mm toward the board.
 
 ## Key Features
 
-- **Reuses all original hardware** — grip bolt, washer, retainer clip, and hand screw all carry over. Nothing proprietary.
-- **Captive nut pockets** — the hand-screw nut loads into a pocket through the open side and is captured top/bottom, so you're not fishing for a loose nut during assembly.
+- **Reuses all original hardware:** grip bolt, washer, retainer clip, and hand screw all carry over. Nothing proprietary.
+- **Captive nut pockets:** the hand-screw nut loads into a pocket through the open side and is captured top/bottom, so you're not fishing for a loose nut during assembly.
 - **Rounded PCB-facing edges** to match the look of the stock arm.
 - **Long arm has a side rail-lock pin** that presses the rail from the side, locking the arm's position without relying on the hand screw alone.
-- **Self-supporting geometry** — bosses and internal blocks are tapered so most of it prints without support.
-- **Fully parametric OpenSCAD** — every holder dimension is a variable. Different holder? Edit and re-export.
+- **Self-supporting geometry:** bosses and internal blocks are tapered so most of it prints without support.
+- **Fully parametric OpenSCAD:** every holder dimension is a variable. Different holder? Edit and re-export.
 
 ## Print Settings
 
-- **Material:** PLA+, PETG, PCTG, ABS, ASA, or similar. Tested with PLA+ and PCTG — both showed no signs of weakness and either should be plenty strong for most users.
+- **Material:** PLA+, PETG, PCTG, ABS, ASA, or similar. Tested with PLA+ and PCTG; both showed no signs of weakness and either should be plenty strong for most users.
 - **Layer height:** 0.2 mm
 - **Infill:** 20–25%
 - **Walls:** 0.4 mm nozzle, 0.8–1.2 mm minimum wall
@@ -85,19 +98,19 @@ Retainer bolt hole ~4 mm diameter; boss protrudes ~4 mm toward the board.
 4. Follow the shared hardware steps above to remount the PCB bracket.
 5. Repeat for the other arm.
 
-> **Rail-lock pin:** The pin sits between the hand-tightened screw and the rail; tightening the screw presses the pin against the rail to lock the arm's position. A replacement pin STL is included in case the original is lost or worn — position it carefully before tightening the screw.
+> **Rail-lock pin:** The pin sits between the hand-tightened screw and the rail; tightening the screw presses the pin against the rail to lock the arm's position. A replacement pin STL is included in case the original is lost or worn. Position it carefully before tightening the screw.
 
 ## Customizing for a Different Holder
 
 Everything is parametric. If your holder isn't one of the two listed above, grab the OpenSCAD source from GitHub, measure your arm (cross-section at top and bottom, bolt height, rail size), set the variables at the top of the file, and export your own STL.
 
-- `pcb-holder-extension.scad` — cap-on extension
-- `pcb-holder-long-arm.scad` — full arm replacement
-- `rail-lock-pin.scad` — replacement rail-lock pin
+- `pcb-holder-extension.scad`: cap-on extension
+- `pcb-holder-long-arm.scad`: full arm replacement
+- `rail-lock-pin.scad`: replacement rail-lock pin
 
 ## Notes
 
-Test-fit with your largest PCB *before* you rely on this for a rotation. The whole point is clearing the frame on rotation, so spin it through the full range and make sure nothing collides. Use at your own risk — it's a printed bracket holding a board you presumably care about.
+Test-fit with your largest PCB *before* you rely on this for a rotation. The whole point is clearing the frame on rotation, so spin it through the full range and make sure nothing collides. Use at your own risk; it's a printed bracket holding a board you presumably care about.
 
 ## Source & Documentation
 
