@@ -58,7 +58,7 @@ body_x_top    = 18.5;     // mm
 body_y_top    = 20;     // mm
 
 // Total body height: tapered tube from the rail base up to the top cap
-body_height = 164;   // mm
+body_height = 146;   // mm
 
 wall_thickness = 3;  // mm
 
