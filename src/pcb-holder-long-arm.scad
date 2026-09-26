@@ -188,9 +188,10 @@ screw_plate_screw_d = 4;       // mm - mounting screw diameter
 // along the rail. Reuses the same nut and screw size as the upper hand-screw.
 side_nut_holder_x_size = screw_plate_x / 2;   // mm - X width (matches the empty area span)
 side_nut_holder_corner_r = 1.5;               // mm - radius rounding all block edges/corners
-// Wall around the side nut nook: floor, ceiling, and both Y side walls (the
-// inner wall against the rail base and the outer screw-face wall) all get
-// this thickness. The -X back wall is set by side_nut_holder_x_size.
+// Wall around the side nut nook: floor, ceiling, and the outer screw-face
+// wall get this thickness. The inner wall against the rail base stays at
+// nut_holder_wall_thickness (it is backed by the rail base wall), and the
+// -X back wall is set by side_nut_holder_x_size.
 side_nut_holder_wall_thickness = 2.5;         // mm
 
 // Plastic pin between the rail-locking hand-screw and the rail. The screw
@@ -295,10 +296,12 @@ rail_base_center_z = (rail_base_top_z + rail_base_bot_z) / 2;
 // the rail base (on the half-width plate's Y side), centered in X on the
 // missing-half empty area, and centered in Z on the rail (so the screw axis
 // runs through the rail). The block is the nut nook plus
-// side_nut_holder_wall_thickness on each Y and Z side.
+// nut_holder_wall_thickness on the inner Y side (against the rail base) and
+// side_nut_holder_wall_thickness on the outer Y side and both Z sides.
 side_nut_nook_y_size     = hand_screw_nut_thick + 2 * nut_nook_y_clear;
 side_nut_nook_z_size     = hand_screw_nut_af    + 2 * nut_nook_z_clear;
-side_nut_holder_y_size   = side_nut_nook_y_size + 2 * side_nut_holder_wall_thickness;
+side_nut_holder_y_size   = nut_holder_wall_thickness + side_nut_nook_y_size
+                           + side_nut_holder_wall_thickness;
 side_nut_holder_z_size   = side_nut_nook_z_size + 2 * side_nut_holder_wall_thickness;
 side_nut_holder_x_center = -wall_x_trim / 2
                            - screw_plate_half_x_keep * screw_plate_x / 4;
@@ -308,11 +311,10 @@ side_nut_holder_y_center = side_nut_holder_y_inner
 side_nut_holder_y_outer  = side_nut_holder_y_inner
                            + screw_plate_half_y_dir * side_nut_holder_y_size;
 side_nut_holder_z_center = rail_base_center_z;
-// Nut nook Y center: one side_nut_holder_wall_thickness out from the rail
-// base face (same as the block center, since the Y walls are equal).
+// Nut nook Y center: one nut_holder_wall_thickness out from the rail base face.
 side_nut_nook_y_center   = side_nut_holder_y_inner
                            + screw_plate_half_y_dir
-                             * (side_nut_holder_wall_thickness + side_nut_nook_y_size / 2);
+                             * (nut_holder_wall_thickness + side_nut_nook_y_size / 2);
 
 // Side nut holder pin-bore stages along the screw Y axis:
 //   1) Outer hole: full-bore through both block walls and the nut nook —
@@ -667,7 +669,7 @@ module side_nut_holder() {
                 sphere(r = r);
         // Sharp anchor strip on the bed at the rail base outer face. Hull
         // pulls the block's outer-bottom edge down to here along a flat
-        // self-supporting slope (~34° from horizontal) and fills the rail
+        // self-supporting slope (~38° from horizontal) and fills the rail
         // base bottom-corner rounding under the block. Strip is sharp (no
         // sphere) so the slope's bottom edge stays a hard line on the bed.
         translate([side_nut_holder_x_center, ay, az])
